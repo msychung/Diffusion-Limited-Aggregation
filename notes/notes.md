@@ -5,4 +5,3 @@
 ```
 dX = np.sqrt(dt) * np.random.randn(1,N)
 X = np.cumsum(dX, axis=1)
-'''
