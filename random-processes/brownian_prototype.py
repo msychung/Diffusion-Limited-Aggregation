@@ -176,6 +176,7 @@ class BrownianMotion():
         plt.show()  
 
 
-# Create instance of class and call relevant method
-test = BrownianMotion()
-test.brownian_2D()
+if __name__ == '__main__':
+    # Create instance of class and call relevant method
+    test = BrownianMotion()
+    test.brownian_2D()
