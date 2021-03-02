@@ -1,4 +1,5 @@
 # Notes
+*Week 18 progress update:* took the last week or so off because I had a hectic week of job interviews/assessment centres. Now full steam ahead. 
 
 ### Animation
 - [ ] Combine 1D, 2D, 3D animation methods into one single method with dimension parameter
