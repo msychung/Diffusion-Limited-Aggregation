@@ -2,7 +2,8 @@
 *Week 18 progress update:* took the last week or so off because I had a hectic week of job interviews/assessment centres. Now full steam ahead. 
 
 ### Animation
-- [ ] Combine 1D, 2D, 3D animation methods into one single method with dimension parameter
+- [x] Combine 1D, 2D, 3D animation methods into one single method with dimension parameter
+- [ ] Decide whether you want one big animation method (with dimension parameter) or individual 1D, 2D, 3D animation methods - ask?
 
 ### Brownian Motion
 - [x] Replace for loop with vectorised method? Is much quicker and probably neater
