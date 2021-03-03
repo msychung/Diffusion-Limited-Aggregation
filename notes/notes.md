@@ -3,9 +3,9 @@
 
 ### Constant step size
 #### Prototype (constantstep_prototype.py)
-- [ ] Produce and plot random walk in 1D
+- [x] Produce 1D random walk and extend to 2D and 3D
 
-- [ ] Extend to 2D and 3D
+- [ ] Produce plots of paths
 
 - [ ] Decide if it's worth animating (probably not)
 
@@ -29,6 +29,8 @@
 - [x] Extend to multiple paths (for all dimensions)
 
 - You need to refresh your stats lol, standard normal distribution isn't between -1 and 1!!
+
+- Vectorised method is more efficient since all elements dx are generated at once (using numpy.random.randn), instead of generating one at a time using the for loop method
 
 ##### TESTS
 - [ ] Average displacement <d> after N steps should be 0
