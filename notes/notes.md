@@ -24,7 +24,7 @@ This file performs the following:
 - initialises the method attributes (maybe turn common ones in class attributes?)
 - generates the random walks
 - generates plots (maybe move to animation
-- calculates average distances and mean free time for each walk
+- calculates average displacements and mean free time for each walk
 - displays gathered information
 
 ##### TO DO
@@ -40,10 +40,12 @@ This file performs the following:
 
 - [x] Extend to multiple paths (for all dimensions)
 
+- [ ] Calculate average displacements at each step (to plot a graph, instead of just final displacement)
+
 ##### TESTS
 - [ ] Average displacement <d> after N steps should be 0
 
-- [ ] Root-mean-square disciplacemen after N steps should be sqrt(N)
+- [ ] Root-mean-square disciplacement after N steps should be sqrt(N)
 
 - [ ] Could test for the mean free time $\tau$, the time interval between collisions (or steps). $\tau$ = T/N where N is the total number of steps and T is the total time.
 
