@@ -3,6 +3,7 @@
 
 ### Animation (brownian_animation.py)
 - [x] Combine 1D, 2D, 3D animation methods into one single method with dimension parameter
+
 - [ ] Decide whether you want one big animation method (with dimension parameter) or individual 1D, 2D, 3D animation methods - ask?
 
 ### Brownian Motion (brownian_prototype.py)
@@ -18,5 +19,11 @@
 
 - [x] Extend to multiple paths (for all dimensions)
 
-- [ ] Could test for the mean free time $\tau$, the time interval between collisions (or steps). $\tau$ = T/N where N is the total number
-of steps and T is the total time.
+- You need to refresh your stats lol, standard normal distribution isn't between -1 and 1!!
+
+#### Tests
+- [ ] Average displacement <d> after N steps should be 0
+
+- [ ] Root-mean-square disciplacemen after N steps should be sqrt(N)
+
+- [ ] Could test for the mean free time $\tau$, the time interval between collisions (or steps). $\tau$ = T/N where N is the total number of steps and T is the total time.
