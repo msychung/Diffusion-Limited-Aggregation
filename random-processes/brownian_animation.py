@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 from numpy import random
 from random import random
+plt.style.use('seaborn-whitegrid')
 
 
 class BrownianAnimation():
@@ -27,7 +28,7 @@ class BrownianAnimation():
             Whether the animation repeats after completion
         
     '''
-    # # The random state can be set to maintain reproducibility:
+    ### The random state can be set to maintain reproducibility:
     # np.random.seed(0)
 
 
@@ -104,7 +105,7 @@ class BrownianAnimation():
         return lines
 
 
-    def animate(self, dimension):
+    def animate(self, dimension, save=False):
         '''
         Creates animations in 1D, 2D and 3D, using matplotlib.animation.
 
@@ -112,6 +113,9 @@ class BrownianAnimation():
         ----------
         dimension : str
             Selects whether the animation is plotted in 1D, 2D or 3D
+
+        save : bool
+            Determines whether animation is saved to specified path
         '''
 
         ### Initialise parameters as previously
@@ -150,7 +154,7 @@ class BrownianAnimation():
             ax = plt.axes(xlim=(min(x)+0.1*min(x), max(x)+0.1*max(x)), ylim=(min(y)+0.1*min(y), max(y)+0.1*max(y)))
             ax.set_xlabel('X(t)')
             ax.set_ylabel('Y(t)')
-            ax.set_title('2D Discretised Brownian Paths')
+            ax.set_title('2D Discretised Brownian Path')
 
         else:   # dimension == '3D'
             ax = fig.add_subplot(1, 1, 1, projection='3d')
@@ -160,7 +164,7 @@ class BrownianAnimation():
             ax.set_ylim3d((min(y)+0.1*min(y), max(y)+0.1*max(y)))
             ax.set_zlabel('Z(t)')
             ax.set_zlim3d((min(z)+0.1*min(z), max(z)+0.1*max(z)))
-            ax.set_title('3D Discretised Brownian Paths')
+            ax.set_title('3D Discretised Brownian Path')
 
         ### Use list comprehension to create a list of Line2D Objects
         if dimension == '1D' or '2D':
@@ -173,9 +177,15 @@ class BrownianAnimation():
         anim = animation.FuncAnimation(
         fig, self.update_random_walks, N+1, fargs=(walkData, lines, dimension), interval=30, repeat=True, blit=False)
 
+        if save:
+            file_name = input("Name of animation file: ")
+            full_path = rf"C:\Users\Melissa\OneDrive - Lancaster University\University\Third Year\PHYS 389\Results\{file_name}.gif" 
+            anim.save(full_path)
+
         plt.show()
 
 
+    '''Individual methods - decide if you want to keep:'''
     def animation_1D(self):
         ### Initialise parameters as previously
         T = 1.0   
@@ -224,7 +234,7 @@ class BrownianAnimation():
 
         ax.set_xlabel('X(t)')
         ax.set_ylabel('Y(t)')
-        ax.set_title('2D Discretised Brownian Paths')
+        ax.set_title('2D Discretised Brownian Path')
 
         ### Use list comprehension to create a list of Line2D Objects
         lines = [ax.plot(data[0, 0:1], data[1, 0:1])[0] for data in walkData]
@@ -258,7 +268,7 @@ class BrownianAnimation():
         ax.set_ylim3d((min(y)+0.1*min(y), max(y)+0.1*max(y)))
         ax.set_zlabel('Z(t)')
         ax.set_zlim3d((min(z)+0.1*min(z), max(z)+0.1*max(z)))
-        ax.set_title('3D Discretised Brownian Paths')
+        ax.set_title('3D Discretised Brownian Path')
 
         ### Use list comprehension to create a list of Line2D Objects
         lines = [ax.plot(data[0, 0:1], data[1, 0:1], data[2, 0:1])[0] for data in walkData]
