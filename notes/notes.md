@@ -1,12 +1,21 @@
 # Notes
 *Week 18 progress update:* took the last week or so off because I had a hectic week of job interviews/assessment centres. Now full steam ahead. 
 
-### Animation (brownian_animation.py)
+### Constant step size
+#### Prototype (constantstep_prototype.py)
+- [ ] Produce and plot random walk in 1D
+
+- [ ] Extend to 2D and 3D
+
+- [ ] Decide if it's worth animating (probably not)
+
+### Variable step size
+#### Animation (variablestep_anim.py)
 - [x] Combine 1D, 2D, 3D animation methods into one single method with dimension parameter
 
 - [ ] Decide whether you want one big animation method (with dimension parameter) or individual 1D, 2D, 3D animation methods - ask?
 
-### Brownian Motion (brownian_prototype.py)
+#### Prototype (variable step_prototype.py)
 - [x] Replace for loop with vectorised method? Is much quicker and probably neater
   ```
   dx = np.sqrt(dt) * np.random.randn(1,N)
@@ -21,7 +30,7 @@
 
 - You need to refresh your stats lol, standard normal distribution isn't between -1 and 1!!
 
-#### Tests
+##### TESTS
 - [ ] Average displacement <d> after N steps should be 0
 
 - [ ] Root-mean-square disciplacemen after N steps should be sqrt(N)
