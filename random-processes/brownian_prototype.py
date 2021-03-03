@@ -10,7 +10,30 @@ plt.style.use('seaborn-whitegrid')
 
 class BrownianMotion():
     '''
-    Implementation of scalar standard Brownian motion, in the time interval [0, T] with N points ((N - 1) subintervals). Begins with a simple y = x plot, before plotting positions for 1D and 2D Brownian motion. Each time, a different set of results and output plot should be produced. This can be prevented by using a seed to maintain reproducibility.
+    Implementation of scalar standard Brownian motion, in the time interval [0, T] with N points ((N - 1) subintervals). Begins with a simple y = x plot, before plotting positions for 1D, 2D and 3D Brownian motion. Each time, a different set of results and output plot should be produced. This can be prevented by using a seed to maintain reproducibility.
+
+    Methods
+    -------
+    __init__
+        Constructor method. Currently empty
+
+    xy_line
+        Plotting a rough x-y line using random module
+
+    brownian_1D_loop
+        1D Brownian motion for a single path, using a for loop
+
+    brownian_1D_vec
+        1D Brownian motion for multiple maths, using a vectorised method
+
+    brownian_2D_loop
+        2D Brownian motion for a single path, using a for loop
+
+    brownian_2D_vec
+        2D Brownian motion for multiple maths, using a vectorised method
+
+    brownian_3D_vec
+        3D Brownian motion for multiple maths, using a vectorised method
     '''
 
     def __init__(self):
@@ -56,7 +79,7 @@ class BrownianMotion():
         plt.show()
 
 
-    def brownian_1D(self):
+    def brownian_1D_loop(self):
         '''
         1D Brownian Motion Path for a single walker, using a for loop
         '''
@@ -125,7 +148,7 @@ class BrownianMotion():
         plt.show()  
 
 
-    def brownian_2D(self):
+    def brownian_2D_loop(self):
         '''
         2D Brownian Motion Path for a single walker, using a for loop
         '''
@@ -163,7 +186,7 @@ class BrownianMotion():
         df = pd.DataFrame({'t': t, 'x': x, 'dx': dx, 'y': y, 'dy': dy})
         del t, x, dx, y, dy
 
-        ### Plot t against x and y
+        ### Plot x against y
         fig = plt.figure()
         ax = fig.add_subplot(111)
 
@@ -204,7 +227,7 @@ class BrownianMotion():
         df_join = pd.concat([df_x, df_y], axis = 1)
         df_join.insert(0, 'Time', t, True)
 
-        ### Plot t against x 
+        ### Plot x against y 
         fig, ax = plt.figure(), plt.axes()
 
         # Aesthetics: cycles through a colormap
@@ -218,7 +241,50 @@ class BrownianMotion():
         plt.show()  
 
 
+    def brownian_3D_vec(self):
+        '''
+        3D Brownian Motion Path, using vectorised method and for multiple (M) walkers
+        '''
+        ### Initialise parameters
+        T = 1.0    # time step
+        N = 101     # number of steps (+1 to give N-1 subintervals)
+        M = 6    # number of paths ('walkers')
+        dt = math.sqrt(T/(N-1))    # sqrt of time interval
+        t = np.linspace(0, T, N)    # Create time list
+
+        ### Vectorised method for multiple paths
+        dx = dt * np.random.randn(M, N)
+        x = np.cumsum(dx, axis = 1)
+
+        dy = dt * np.random.randn(M, N)
+        y = np.cumsum(dy, axis = 1)
+
+        dz = dt * np.random.randn(M, N)
+        z = np.cumsum(dz, axis = 1)
+        
+        ### Assign values into a dataframe
+        df_x = pd.DataFrame(x).T
+        df_y = pd.DataFrame(y).T
+        df_z = pd.DataFrame(z).T
+        df_join = pd.concat([df_x, df_y, df_z], axis = 1)
+        df_join.insert(0, 'Time', t, True)
+
+        ### Plot t against x 
+        fig = plt.figure()
+        ax = fig.add_subplot(1, 1, 1, projection='3d')
+
+        # Aesthetics: cycles through a colormap
+        ax.set_prop_cycle('color', plt.cm.winter(np.linspace(0, 4, M*4)))  
+
+        for i in range(M):
+            ax.plot(df_join.iloc[:, i+1], df_join.iloc[:, i+1+M], df_join.iloc[:, i+1+M+M], marker='o', markersize=0.25, linewidth=0.2)
+
+        ax.set(xlabel='Random Variable $X(t)$', ylabel='Random Variable $Y(t)$', zlabel='Random Variable $Z(t)$', title='3D Brownian Motion Multiple Paths')
+
+        plt.show()  
+
+
 if __name__ == '__main__':
     ### Create instance of class and call relevant method
     test = BrownianMotion()
-    test.brownian_1D_vec()
+    test.brownian_3D_vec()
