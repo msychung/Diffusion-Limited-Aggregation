@@ -15,7 +15,7 @@ class BrownianMotion():
     Methods
     -------
     __init__
-        Constructor method. Currently empty
+        Constructor method, sets class variables and random seed
 
     xy_line
         Plotting a rough x-y line using random module
@@ -38,12 +38,13 @@ class BrownianMotion():
 
     def __init__(self, T, N, M):
         np.random.seed(5)
+        
         self.T = T    # time step
         self.N = N    # number of steps
         self.M = M    # number of paths ('walkers')
         
         self.dt = math.sqrt(T/(N-1))    # sqrt of time interval
-        self.t = np.linspace(0, T, N)    # Create time list
+        self.t = np.linspace(0, T, N)    # Create time list (from 0 to T with step size T/N)
 
 
     def xy_line(self):
@@ -107,7 +108,7 @@ class BrownianMotion():
         ### Plot t against x 
         fig, ax = plt.figure(), plt.axes()
         ax.plot(df['t'], df['x'], marker='o', markersize=1, linewidth=0)
-        ax.set(xlabel='Time t', ylabel='Random Variable $X(t)$', title='1D Brownian Motion Path')
+        ax.set(xlabel='Time t', ylabel='Random Variable $X(t)$', title='1D Brownian Motion Single Path')
         plt.show()  
 
 
@@ -132,7 +133,7 @@ class BrownianMotion():
         for i in range(self.M):
             ax.plot(df['Time'], df.iloc[:, i+1], marker='o', markersize=0.25, linewidth=0)
 
-        ax.set(xlabel='Time t', ylabel='Random Variable $X(t)$', title='1D Brownian Motion Multiple Paths')
+        ax.set(xlabel='Time t', ylabel='Random Variable $X(t)$', title='1D Brownian Motion Multiple Paths (Variable Step Size)')
 
         plt.show()  
 
@@ -172,15 +173,12 @@ class BrownianMotion():
         fig = plt.figure()
         ax = fig.add_subplot(111)
 
-        # Aesthetics: cycles through a colormap
-        ax.set_prop_cycle('color', plt.cm.winter(np.linspace(0, 4, self.M*4)))  
-
         # for i in range(M):
         ax.plot(df['x'], df['y'], marker='o', markersize=1, linewidth=0.5)
         
         ax.set_xlabel('Random Variable $X(t)$')
         ax.set_ylabel('Random Variable $Y(t)$')
-        ax.title.set_text('2D Brownian Motion Multiple Paths')
+        ax.title.set_text('2D Brownian Motion Single Path (Variable Step Size)')
 
         plt.show()  
 
@@ -211,7 +209,7 @@ class BrownianMotion():
         for i in range(self.M):
             ax.plot(df_join.iloc[:, i+1], df_join.iloc[:, i+1+self.M], marker='o', markersize=0.25, linewidth=0.2)
 
-        ax.set(xlabel='Random Variable $X(t)$', ylabel='Random Variable $Y(t)$', title='2D Brownian Motion Multiple Paths')
+        ax.set(xlabel='Random Variable $X(t)$', ylabel='Random Variable $Y(t)$', title='2D Brownian Motion Multiple Paths (Variable Step Size)')
 
         plt.show()  
 
@@ -237,7 +235,7 @@ class BrownianMotion():
         df_join = pd.concat([df_x, df_y, df_z], axis = 1)
         df_join.insert(0, 'Time', self.t, True)
 
-        ### Plot t against x 
+        ### Plot x against y and z
         fig = plt.figure()
         ax = fig.add_subplot(1, 1, 1, projection='3d')
 
@@ -247,7 +245,7 @@ class BrownianMotion():
         for i in range(self.M):
             ax.plot(df_join.iloc[:, i+1], df_join.iloc[:, i+1+self.M], df_join.iloc[:, i+1+self.M+self.M], marker='o', markersize=0.25, linewidth=0.2)
 
-        ax.set(xlabel='Random Variable $X(t)$', ylabel='Random Variable $Y(t)$', zlabel='Random Variable $Z(t)$', title='3D Brownian Motion Multiple Paths')
+        ax.set(xlabel='Random Variable $X(t)$', ylabel='Random Variable $Y(t)$', zlabel='Random Variable $Z(t)$', title='3D Brownian Motion Multiple Paths (Variable Step Size)')
 
         plt.show()  
 
@@ -255,4 +253,4 @@ class BrownianMotion():
 if __name__ == '__main__':
     ### Create instance of class and call relevant method
     test = BrownianMotion(1.0, 1000, 5)
-    test.brownian_3D_vec()
+    test.brownian_2D_loop()
