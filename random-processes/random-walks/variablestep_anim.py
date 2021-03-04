@@ -122,36 +122,63 @@ class BrownianAnimation():
         T = 1.0   
         N = 1001 
         dt = math.sqrt(T/(N-1))    
+        M = 6       # number of walkers
 
-        ### Put lineData list into another list (needed for matplotlib.lines.Line2D module)
-        walkData = [self.generate_random_walks(dt, N, dimension)]
+        ### Put lineData list into another list (needed for matplotlib.lines.Line2D module). For loop added for multiple walkers.
 
+        walkData = [self.generate_random_walks(dt, N, dimension) for i in range(M)]
+
+        ### Assign lists in walkData to position variables
+        ### Also set limits for graph axes (otherwise goes off graph for multiple walkers)
+        minmax_x, minmax_y, minmax_z = [], [], []
+ 
         if dimension == '1D':
-            pos = walkData[0][0]
-            x = walkData[0][1]
+            for i in range(M):
+                pos = walkData[i][0]
+                x = walkData[i][1]
+
+                max_x, min_x = max(x), min(x)
+                minmax_x.append(max_x), minmax_x.append(min_x)
 
         elif dimension == '2D':
-            x = walkData[0][0]
-            y = walkData[0][1]
+            for i in range(M):
+                x = walkData[i][0]
+                y = walkData[i][1]
+
+                max_x, min_x = max(x), min(x)
+                minmax_x.append(max_x), minmax_x.append(min_x)
+
+                max_y, min_y = max(y), min(y)
+                minmax_y.append(max_y), minmax_y.append(min_y)
 
         else:   # dimension == '3D'
-            x = walkData[0][0]
-            y = walkData[0][1]
-            z = walkData[0][2]
+            for i in range(M):
+                x = walkData[i][0]
+                y = walkData[i][1]
+                z = walkData[i][2]
+
+                max_x, min_x = max(x), min(x)
+                minmax_x.append(max_x), minmax_x.append(min_x)
+
+                max_y, min_y = max(y), min(y)
+                minmax_y.append(max_y), minmax_y.append(min_y)
+
+                max_z, min_z = max(z), min(z)
+                minmax_z.append(max_z), minmax_z.append(min_z)
 
         ### Create figure and axis objects with tight axes
         fig = plt.figure()
 
         if dimension == '1D':
             ax = fig.add_subplot(1, 1, 1)
-            ax = plt.axes(xlim=(min(pos)+0.1*min(pos), max(pos)+0.1*max(pos)), ylim=(min(x)+0.1*min(x), max(x)+0.1*max(x)))
+            ax = plt.axes(xlim=(min(pos)+0.1*min(pos), max(pos)+0.1*max(pos)), ylim=(min(minmax_x)+0.1*min(minmax_x), max(minmax_x)+0.1*max(minmax_x)))
             ax.set_xlabel('Number of steps')
             ax.set_ylabel('X(t)')
             ax.set_title('1D Discretised Brownian Path')
 
         elif dimension == '2D':
             ax = fig.add_subplot(1, 1, 1)
-            ax = plt.axes(xlim=(min(x)+0.1*min(x), max(x)+0.1*max(x)), ylim=(min(y)+0.1*min(y), max(y)+0.1*max(y)))
+            ax = plt.axes(xlim=(min(minmax_x)+0.1*min(minmax_x), max(minmax_x)+0.1*max(minmax_x)), ylim=(min(minmax_y)+0.1*min(minmax_y), max(minmax_y)+0.1*max(minmax_y)))
             ax.set_xlabel('X(t)')
             ax.set_ylabel('Y(t)')
             ax.set_title('2D Discretised Brownian Path')
@@ -159,11 +186,11 @@ class BrownianAnimation():
         else:   # dimension == '3D'
             ax = fig.add_subplot(1, 1, 1, projection='3d')
             ax.set_xlabel('X(t)')
-            ax.set_xlim3d((min(x)+0.1*min(x), max(x)+0.1*max(x)))
+            ax.set_xlim3d((min(minmax_x)+0.1*min(minmax_x), max(minmax_x)+0.1*max(minmax_x)))
             ax.set_ylabel('Y(t)')
-            ax.set_ylim3d((min(y)+0.1*min(y), max(y)+0.1*max(y)))
+            ax.set_ylim3d((min(minmax_y)+0.1*min(minmax_y), max(minmax_y)+0.1*max(minmax_y)))
             ax.set_zlabel('Z(t)')
-            ax.set_zlim3d((min(z)+0.1*min(z), max(z)+0.1*max(z)))
+            ax.set_zlim3d((min(minmax_z)+0.1*min(minmax_z), max(minmax_z)+0.1*max(minmax_z)))
             ax.set_title('3D Discretised Brownian Path')
 
         ### Use list comprehension to create a list of Line2D Objects
@@ -183,6 +210,7 @@ class BrownianAnimation():
             anim.save(full_path)
 
         plt.show()
+
 
 
     '''Individual methods - decide if you want to keep:'''
@@ -284,3 +312,4 @@ if __name__ == '__main__':
     ### Create instance of class and call relevant method
     test = BrownianAnimation()
     test.animate('3D')
+
