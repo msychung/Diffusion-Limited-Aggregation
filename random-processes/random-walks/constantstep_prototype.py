@@ -10,9 +10,9 @@ import random
 plt.style.use('seaborn-whitegrid')
 
 
-N = 10000      # number of steps
+N = 150      # number of steps
 
-def calc_random_walk(dimension): 
+def gen_random_walk(dimension): 
     '''
     Creates a random walk with constant step size, using np.random.choice. 
 
@@ -38,9 +38,9 @@ def calc_random_walk(dimension):
 
         coord_1D = x[-1]
 
-        print('Destination co-ordinates =', coord_1D, ', Distance =', distances[-1])
+        # print('Destination co-ordinates =', coord_1D, ', Distance =', distances[-1])
 
-        return x, coord_1D, distances
+        return x, coord_1D, distances[-1]
 
 
     elif dimension == '2D':
@@ -53,7 +53,7 @@ def calc_random_walk(dimension):
 
         coord_2D = (x[-1], y[-1])
 
-        print('Destination co-ordinates =', coord_2D, ', Distance =', distances[-1])
+        # print('Destination co-ordinates =', coord_2D, ', Distance =', distances[-1])
 
         return x, y, coord_2D, distances
 
@@ -69,9 +69,72 @@ def calc_random_walk(dimension):
 
         coord_3D = (x[-1], y[-1], z[-1])
         
-        print('Destination co-ordinates =', coord_3D, ', Distance =', distances[-1])
+        # print('Destination co-ordinates =', coord_3D, ', Distance =', distances[-1])
 
         return x, y, z, coord_3D, distances
+
+
+def calc_displacements(dimension):
+    '''
+    Calculates average displacement and rms displacement over many iterations, for random walks in 1D, 2D and 3D.
+
+    Parameters
+    ----------
+    dimension : str
+        Selects which array is returned based on number of random variables
+    '''
+    iterations = 100000
+
+    if dimension == '1D':
+        all_coord, all_coord_sq = 0, 0
+
+        for i in range(iterations):
+            coord_1D = gen_random_walk('1D')[1]
+
+            all_coord += coord_1D
+            all_coord_sq += coord_1D**2
+
+        av_disp = all_coord/iterations
+        rms_disp = math.sqrt(all_coord_sq/iterations)
+
+        print(f"For {iterations} iterations and {N} steps, the average displacement is {av_disp} and the root-mean-squared displacement is {rms_disp}. The root of N is {math.sqrt(N)}.")
+
+
+    elif dimension == '2D':
+        all_xcoord, all_ycoord, all_coord_sq = 0, 0, 0
+
+        for i in range(iterations):
+            coord_2D = gen_random_walk('2D')[2]
+            x, y = coord_2D[0], coord_2D[1]
+
+            all_xcoord += x
+            all_ycoord += y
+
+            all_coord_sq += (x + y)**2
+
+        av_disp = (all_xcoord + all_ycoord)/iterations
+        rms_disp = math.sqrt(all_coord_sq/iterations)
+
+        print(f"For {N} steps and {iterations} iterations, the average displacement is {av_disp} and the root-mean-squared displacement is {rms_disp}. The root of N is {math.sqrt(N)}.")
+
+
+    else:   # dimension == '3D'
+        all_xcoord, all_ycoord, all_zcoord, all_coord_sq = 0, 0, 0, 0
+
+        for i in range(iterations):
+            coord_3D = gen_random_walk('3D')[3]
+            x, y, z = coord_3D[0], coord_3D[1], coord_3D[2]
+
+            all_xcoord += x
+            all_ycoord += y
+            all_zcoord += z
+
+            all_coord_sq += (x + y + z)**2
+
+        av_disp = (all_xcoord + all_ycoord + all_zcoord)/iterations
+        rms_disp = math.sqrt(all_coord_sq/iterations)
+
+        print(f"For {iterations} iterations and {N} steps, the average displacement is {av_disp} and the root-mean-squared displacement is {rms_disp}. The root of N is {math.sqrt(N)}.")
 
 
 def plot_random_walk(dimension):
@@ -88,7 +151,7 @@ def plot_random_walk(dimension):
 
     if dimension == '1D':
         ### Unpack return arguments and create time list
-        x, coord_1D, distances = calc_random_walk('1D')
+        x, coord_1D, distances = gen_random_walk('1D')
 
         fig, ax = plt.subplots(2, 1)
         fig.set_size_inches(8, 6)
@@ -105,7 +168,7 @@ def plot_random_walk(dimension):
 
     elif dimension == '2D':
         ### Unpack return arguments
-        x, y, coord_2D, distances = calc_random_walk('2D')
+        x, y, coord_2D, distances = gen_random_walk('2D')
 
         fig, ax = plt.subplots(2, 1)
         fig.set_size_inches(8, 6)
@@ -122,7 +185,7 @@ def plot_random_walk(dimension):
 
     else:   # dimension = '3D'
         ### Unpack return arguments
-        x, y, z, coord_3D, distances = calc_random_walk('3D')
+        x, y, z, coord_3D, distances = gen_random_walk('3D')
 
         ### Plot x against y and z
         fig = plt.figure()
@@ -140,6 +203,7 @@ def plot_random_walk(dimension):
         plt.show() 
 
 
-
-### Call method with dimension parameter
-plot_random_walk('3D')
+if __name__ == '__main__':
+    ### Call method with dimension parameter
+    calc_displacements('3D')
+    # plot_random_walk('3D')
