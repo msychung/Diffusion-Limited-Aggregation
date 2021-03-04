@@ -5,9 +5,14 @@
 #### Prototype (constantstep_prototype.py)
 - [x] Produce 1D random walk and extend to 2D and 3D
 
-- [ ] Produce plots of paths
+- [x] Produce plots of paths
 
 - [ ] Decide if it's worth animating (probably not)
+
+- [x] Calculate average displacements for all dimensions
+
+##### NOTES FOR REFERENCE
+- Even steps should result in displacements closer to the starting point (origin) than odd steps, since odd steps result in one more step in a given direction than any other. 
 
 ### Variable step size
 #### Animation (variablestep_anim.py)
@@ -54,4 +59,5 @@ This file performs the following:
 
 - Vectorised method is more efficient since all elements dx are generated at once (using numpy.random.randn), instead of generating one at a time using the for loop method
 
-- Using a seed for reproducibility is basically essential for further analysis later on
+- Using a seed for reproducibility is basically essential for further analysis later on - needed for testing
+
