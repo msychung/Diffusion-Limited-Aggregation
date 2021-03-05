@@ -11,6 +11,12 @@
 
 - [x] Calculate average displacements for all dimensions
 
+##### TESTS
+- [ ] Test consistency when changing step size (e.g. 1 to 2, fractional) and introducing bias - do displacements adjust accordingly?
+
+- [ ] Test whether 1D/2D lattice walks are recurrent (return to starting point is certain), and >3D are transient (return to starting point is uncertain)
+
+
 ##### NOTES FOR REFERENCE
 - Even steps should result in displacements closer to the starting point (origin) than odd steps, since odd steps result in one more step in a given direction than any other. 
 
