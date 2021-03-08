@@ -1,18 +1,41 @@
 # Notes
 *Week 18 progress update:* took the last week or so off because I had a hectic week of job interviews/assessment centres. Now full steam ahead. 
+
 ## Random Walks
 ### Constant step size
 #### Prototype (constantstep_prototype.py)
+This file performs the following:
+- imports the relevant modules
+- initialises the class attribute butes?)
+- generates the random walks
+- generates plots 
+- calculates average displacements for each walk
+- displays gathered information
+
+##### TO DO
 - [x] Produce 1D random walk and extend to 2D and 3D
 
 - [x] Produce plots of paths
 
-- [ ] Decide if it's worth animating (probably not)
+- [x] Decide if it's worth animating (decided it's not)
 
 - [x] Calculate average displacements for all dimensions
 
+##### TESTS
+- [x] Average displacement <d> after N steps should be 0
+
+- [x] Root-mean-square disciplacement after N steps should be sqrt(N)
+
+- [x] Test consistency when changing step size (e.g. 1 to 2, fractional) and introducing bias - do displacements adjust accordingly?
+
 ##### NOTES FOR REFERENCE
 - Even steps should result in displacements closer to the starting point (origin) than odd steps, since odd steps result in one more step in a given direction than any other. 
+
+- Changing step size to a fixed number (inc. fractions) other than 1 changes rms displacement proportionally, and average <d> remains close to zero.
+
+- Introducing bias results in completely skewed mean and rms displaements (as expected).
+
+- 1D/2D lattice walks are recurrent (return to starting point is certain), and >3D are transient (return to starting point is uncertain). Testing this recurrence/transience is difficult for a computer simulation 
 
 ### Variable step size
 #### Animation (variablestep_anim.py)
@@ -26,10 +49,9 @@ This file visualises the 1D, 2D and 3D random walk results through animations.
 #### Prototype (variable step_prototype.py)
 This file performs the following:
 - imports the relevant modules
-- initialises the method attributes (maybe turn common ones in class attributes?)
+- initialises the class attributes
 - generates the random walks
-- generates plots (maybe move to animation
-- calculates average displacements and mean free time for each walk
+- generates plots **(maybe move to animation)**
 - displays gathered information
 
 ##### TO DO
@@ -48,11 +70,11 @@ This file performs the following:
 - [ ] Calculate average displacements at each step (to plot a graph, instead of just final displacement)
 
 ##### TESTS
-- [ ] Average displacement <d> after N steps should be 0
+- [x] Average displacement <d> after N steps should be 0
 
-- [ ] Root-mean-square disciplacement after N steps should be sqrt(N)
+- [x] Root-mean-square disciplacement after N steps should NOT be sqrt(N) due to variable step size - need to use a PDF i.e. continuous variable -> Langevin equation! 
 
-- [ ] Could test for the mean free time $\tau$, the time interval between collisions (or steps). $\tau$ = T/N where N is the total number of steps and T is the total time.
+- [ ] Could test for the mean free time $\tau$, the time interval between collisions (or steps). $\tau$ = T/N where N is the total number of steps and T is the total time. Not really sure if I can test this since it's just a calculation...
 
 ##### NOTES FOR REFERENCE
 - You need to refresh your stats lol, standard normal distribution isn't between -1 and 1!!
@@ -60,4 +82,14 @@ This file performs the following:
 - Vectorised method is more efficient since all elements dx are generated at once (using numpy.random.randn), instead of generating one at a time using the for loop method
 
 - Using a seed for reproducibility is basically essential for further analysis later on - needed for testing
+
+
+## Brownian Motion
+### Langevin Equation (langevin.py)
+Solving the Langevin equation, a continuous stochastic differential equation describing the time evolution of Brownian motion.
+
+##### TO DO
+- [ ] Experiment with solving using the Ornstein-Uhlenbeck process and the Euler-Maruyama method.
+
+- [ ] Experiment with using the scipy.integrate.solve_ivp package 
 
