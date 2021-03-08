@@ -8,7 +8,7 @@ from random import random
 plt.style.use('seaborn-whitegrid')
 
 
-class BrownianMotion():
+class Variable_Step():
     '''
     Implementation of scalar standard Brownian motion, in the time interval [0, T] with N points ((N - 1) subintervals). Begins with a simple y = x plot, before plotting positions for 1D, 2D and 3D Brownian motion. Each time, a different set of results and output plot should be produced. This can be prevented by using a seed to maintain reproducibility, using np.random.seed(0) and changing the parameter.
 
@@ -36,15 +36,33 @@ class BrownianMotion():
         3D Brownian motion for multiple maths, using a vectorised method
     '''
 
-    def __init__(self, T, N, M):
+    def __init__(self, T, N, M, iterations):
+        '''
+        Initialise the parameters every time an instance of the class is called. 
+
+        Parameters
+        ----------
+        T : float
+            The total time for which the simulation is run
+
+        N : int
+            The number of steps taken by any one walker
+
+        M : int
+            The number of walkers
+
+        iterations : int
+            The number of iterations of one simulation
+        '''
         np.random.seed(5)
         
-        self.T = T    # time step
+        self.T = T    # total simulation time
         self.N = N    # number of steps
         self.M = M    # number of paths ('walkers')
+        self.iterations = iterations    # number of iterations of one simulation
         
         self.dt = math.sqrt(T/(N-1))    # sqrt of time interval
-        self.t = np.linspace(0, T, N)    # Create time list (from 0 to T with step size T/N)
+        self.t = np.linspace(0, T, N)    # create time list (from 0 to T with step size T/N)
 
 
     def xy_line(self):
@@ -83,9 +101,10 @@ class BrownianMotion():
         plt.show()
 
 
-    def brownian_1D_loop(self):
+    def brownian_1D_loop(self, plot=True):
         '''
         1D Brownian Motion Path for a single walker, using a for loop
+        Plot parameter set to False when method called in calc_displacements() for displacement calculations
         '''
         ### Create lists of zeroes of length N
         x = [0] * self.N    # Random variable x
@@ -105,11 +124,14 @@ class BrownianMotion():
         df = pd.DataFrame({'t': self.t, 'x': x, 'dx': dx})
         del x, dx
 
-        ### Plot t against x 
-        fig, ax = plt.figure(), plt.axes()
-        ax.plot(df['t'], df['x'], marker='o', markersize=1, linewidth=0)
-        ax.set(xlabel='Time t', ylabel='Random Variable $X(t)$', title='1D Brownian Motion Single Path')
-        plt.show()  
+        if plot == True:
+            ### Plot t against x 
+            fig, ax = plt.figure(), plt.axes()
+            ax.plot(df['t'], df['x'], marker='o', markersize=1, linewidth=0)
+            ax.set(xlabel='Time t', ylabel='Random Variable $X(t)$', title='1D Brownian Motion Single Path')
+            plt.show()  
+
+        return df
 
 
     def brownian_1D_vec(self):
@@ -123,6 +145,7 @@ class BrownianMotion():
         ### Assign values into a dataframe
         df = pd.DataFrame(x).T      # takes transpose to flip rows/columns
         df.insert(0, 'Time', self.t, True)
+
 
         ### Plot t against x 
         fig, ax = plt.figure(), plt.axes()
@@ -138,7 +161,7 @@ class BrownianMotion():
         plt.show()  
 
 
-    def brownian_2D_loop(self):
+    def brownian_2D_loop(self, plot=True):
         '''
         2D Brownian Motion Path for a single walker, using a for loop
         '''
@@ -169,23 +192,27 @@ class BrownianMotion():
         df = pd.DataFrame({'t': self.t, 'x': x, 'dx': dx, 'y': y, 'dy': dy})
         del x, dx, y, dy
 
-        ### Plot x against y
-        fig = plt.figure()
-        ax = fig.add_subplot(111)
+        if plot == True:
+            ### Plot x against y
+            fig = plt.figure()
+            ax = fig.add_subplot(111)
 
-        # for i in range(M):
-        ax.plot(df['x'], df['y'], marker='o', markersize=1, linewidth=0.5)
-        
-        ax.set_xlabel('Random Variable $X(t)$')
-        ax.set_ylabel('Random Variable $Y(t)$')
-        ax.title.set_text('2D Brownian Motion Single Path (Variable Step Size)')
+            # for i in range(M):
+            ax.plot(df['x'], df['y'], marker='o', markersize=1, linewidth=0.5)
+            
+            ax.set_xlabel('Random Variable $X(t)$')
+            ax.set_ylabel('Random Variable $Y(t)$')
+            ax.title.set_text('2D Brownian Motion Single Path (Variable Step Size)')
 
-        plt.show()  
+            plt.show()  
+
+        return df
 
 
     def brownian_2D_vec(self):
         '''
         2D Brownian Motion Path, using vectorised method and for multiple (M) walkers
+        Plot parameter set to False when method called in calc_displacements() for displacement calculations
         '''
         ### Vectorised method for multiple paths (MxN array)
         dx = self.dt * np.random.randn(self.M, self.N)
@@ -217,6 +244,7 @@ class BrownianMotion():
     def brownian_3D_vec(self):
         '''
         3D Brownian Motion Path, using vectorised method and for multiple (M) walkers
+        Plot parameter set to False when method called in calc_displacements() for displacement calculations
         '''
         ### Vectorised method for multiple paths (MxN array)
         dx = self.dt * np.random.randn(self.M, self.N)
@@ -250,7 +278,51 @@ class BrownianMotion():
         plt.show()  
 
 
+    def calc_displacements(self, dimension):
+        '''
+        Calculates average displacement and rms displacement over many iterations, for random walks in 1D, 2D and 3D.
+
+        Parameters
+        ----------
+        dimension : str
+            Selects which array is returned based on number of random variables
+        '''
+
+        all_coord, all_xcoord, all_ycoord, all_zcoord, all_coord_sq = 0, 0, 0, 0, 0
+
+        if dimension == '1D':
+            for i in range(self.iterations):
+                df = self.brownian_1D_loop(plot=False)
+                coord_1D = df['x'].iloc[-1]
+                # mean_length = abs(df['dx'].mean())
+
+                all_coord += coord_1D
+                # all_coord_sq += coord_1D**2      
+
+            av_disp = all_coord/self.iterations
+            # rms_disp = math.sqrt(all_coord_sq/self.iterations)
+
+            print(f"For {self.iterations} iterations and {self.N} steps, the average displacement is {av_disp}.")
+
+        elif dimension == '2D':
+            for i in range(self.iterations):
+                df = self.brownian_2D_loop(plot=False)
+                x = df['x'].iloc[-1]
+                y = df['y'].iloc[-1]
+
+                all_xcoord += x
+                all_ycoord += y
+
+            av_disp = (all_xcoord + all_ycoord)/self.iterations
+
+            print(f"For {self.iterations} iterations and {self.N} steps, the average displacement is {av_disp}.")
+
+        else:   # dimension == '3D'
+            print("Still yet to implement 3D average displacement calculation.")
+
+
 if __name__ == '__main__':
     ### Create instance of class and call relevant method
-    test = BrownianMotion(1.0, 1000, 5)
-    test.brownian_2D_loop()
+    test = Variable_Step(1.0, 10000, 5, 1000)
+    # test.brownian_2D_loop()
+    test.calc_displacements('2D')
