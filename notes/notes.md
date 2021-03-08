@@ -7,18 +7,25 @@
 
 - [x] Produce plots of paths
 
-- [ ] Decide if it's worth animating (probably not)
+- [x] Decide if it's worth animating (decided it's not)
 
 - [x] Calculate average displacements for all dimensions
 
 ##### TESTS
-- [ ] Test consistency when changing step size (e.g. 1 to 2, fractional) and introducing bias - do displacements adjust accordingly?
+- [x] Average displacement <d> after N steps should be 0
 
-- [ ] Test whether 1D/2D lattice walks are recurrent (return to starting point is certain), and >3D are transient (return to starting point is uncertain)
+- [x] Root-mean-square disciplacement after N steps should be sqrt(N)
 
+- [x] Test consistency when changing step size (e.g. 1 to 2, fractional) and introducing bias - do displacements adjust accordingly?
 
 ##### NOTES FOR REFERENCE
 - Even steps should result in displacements closer to the starting point (origin) than odd steps, since odd steps result in one more step in a given direction than any other. 
+
+- Changing step size to a fixed number (inc. fractions) other than 1 changes rms displacement proportionally, and average <d> remains close to zero.
+
+- Introducing bias results in completely skewed mean and rms displaements (as expected).
+
+- 1D/2D lattice walks are recurrent (return to starting point is certain), and >3D are transient (return to starting point is uncertain). Testing this recurrence/transience is difficult for a computer simulation 
 
 ### Variable step size
 #### Animation (variablestep_anim.py)
@@ -54,9 +61,9 @@ This file performs the following:
 - [ ] Calculate average displacements at each step (to plot a graph, instead of just final displacement)
 
 ##### TESTS
-- [ ] Average displacement <d> after N steps should be 0
+- [x] Average displacement <d> after N steps should be 0
 
-- [ ] Root-mean-square disciplacement after N steps should be sqrt(N)
+- [ ] Root-mean-square disciplacement after N steps should NOT be sqrt(N) due to variable step size - find if there is some other relation?
 
 - [ ] Could test for the mean free time $\tau$, the time interval between collisions (or steps). $\tau$ = T/N where N is the total number of steps and T is the total time.
 
