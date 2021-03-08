@@ -245,7 +245,7 @@ class Constant_Step():
 
 if __name__ == '__main__':
     ### Call method with dimension parameter
-    test = Constant_Step(2000, 1, 10000)
+    test = Constant_Step(2000, 1, 7000)
     # test.gen_random_walk('3D')
-    test.calc_displacements('3D')
+    test.calc_displacements('1D')
     # test.plot_random_walk('3D')
