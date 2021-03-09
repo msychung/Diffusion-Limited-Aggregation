@@ -34,11 +34,17 @@ class Application():
 
         self.crystal_position = []
         
-        self.padSize = 30
+        # Initialise min and max x, y to define a rectangular crystal domain (limits of crystal)
+        self.min_x, self.min_y = particle.x, particle.y
+        self.max_x, self.max_y = particle.x, particle.y
+        self.padSize = 50
+
+        # Define a domain that is padSize pixels larger than crystal domain
         self.domainMin_x = self.start_x - self.padSize
         self.domainMax_x = self.start_x + self.padSize
         self.domainMin_y = self.start_y - self.padSize
         self.domainMax_y = self.start_y + self.padSize
+
 
     def on_init(self):
         pygame.init()
@@ -63,7 +69,7 @@ class Application():
         '''
         Adds one pixel to each random walk
         '''
-        ss = 2    # set step size
+        ss = 1    # set step size
 
         for particle in self.all_particles:
             if particle.stick:
@@ -76,19 +82,35 @@ class Application():
             new_x = particle.x + dx
             new_y = particle.y + dy
 
-            ### Ensure random walk does not disappear off screen, otherwise application quits
-            if new_x < 0:
-                new_x = 0
-            if new_x > (self.width - 1):
-                new_x = self.width - 1
-            if new_y < 0:
-                new_y = 0
-            if new_y > (self.height - 1):
-                new_y = self.height - 1
+            ### Wrap-around: ensure random walk does not disappear off screen, otherwise application quits
+            if new_x < self.domainMin_x:
+                new_x = self.domainMax_x
+            if new_x > self.domainMax_x:
+                new_x = self.domainMin_x
+            if new_y < self.domainMin_y:
+                new_y = self.domainMax_y
+            if new_y > self.domainMax_y:
+                new_y = self.domainMin_y
 
-            ### Check if pixel has already been covered by walker (need to use hex colour codes)
+            ### Check if pixel has already been covered by walker 
             if self.pixelArray[new_x, new_y] == self.crystalColor:  # light gray
                 self.updateFlag = True
+
+                # Modify simulation domain as crystal grows
+                if particle.x < self.min_x:
+                    self.min_x = particle.x
+                if particle.x > self.max_x:
+                    self.max_x = particle.x
+                if particle.y < self.min_y:
+                    self.min_y = particle.y
+                if particle.y > self.max_y:
+                    self.max_y = particle.y
+                    
+                # Ensure domain minima and maxima never less/more than 1
+                self.domainMin_x = max([self.min_x - self.padSize, 1])
+                self.domainMax_x = min([self.max_x + self.padSize, self.width - 1])
+                self.domainMin_y = max([self.min_y - self.padSize, 1])
+                self.domainMax_y = min([self.max_y + self.padSize, self.width - 1])
 
             else:
                 self.updateFlag = False
@@ -105,7 +127,7 @@ class Application():
         Updates the pixel array if a particle is allocated to the growing crystal, otherwise shows movements of particles on their random walks
         '''
         ## Create seed - must be same colour as other particles or they won't stick!
-        self.pixelArray[self.start_x - 100, self.start_y - 100] = self.crystalColor
+        self.pixelArray[self.start_x - 30, self.start_y - 30] = self.crystalColor
 
         ### Recolour crystal each time
         for coordinate in self.crystal_position:
@@ -142,5 +164,5 @@ class Application():
 
 
 if __name__ == '__main__':
-    test = Application(500)
+    test = Application(50)
     test.on_execute()
