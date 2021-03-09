@@ -2,10 +2,15 @@ import random
 import numpy as np
 import pygame
 
+class Particle():
+    def __init__(self, width, height):
+        # Set starting co-ordinates
+        self.x = round(width/2)
+        self.y = round(height/2)  
 
 class Application():
 
-    def __init__(self):
+    def __init__(self, n):
         # Initialise display surface, set its size and initialise pixel array and colour
         self.displaySurface = None
         self.size = self.width, self.height = 962, 601      # size of display screen
@@ -16,11 +21,14 @@ class Application():
         self.start_x = round(self.width/2)
         self.start_y = round(self.height/2)  
 
-        # Create x and y variables to store co-ordinates
-        self.x = self.start_x
-        self.y = self.start_y 
+        # # Create x and y variables to store co-ordinates
+        # self.x = self.start_x
+        # self.y = self.start_y 
 
         self.updateFlag = False
+
+        self.particle = Particle(self.width, self.height)
+        
 
     def on_init(self):
         pygame.init()
@@ -32,8 +40,8 @@ class Application():
         self.isRunning = True
 
         ### Create a seed point
-        self.pixelArray[self.start_x - 50, self.start_y - 50] = 0xDCDCDC    # Must be same colour as other particles otherwise they won't stick!
-        pygame.display.update()
+        # self.pixelArray[self.start_x - 50, self.start_y - 50] = 0xDCDCDC    # Must be same colour as other particles otherwise they won't stick!
+        # pygame.display.update()
     
     def on_event(self, event):
         '''
@@ -47,12 +55,14 @@ class Application():
         '''
         Adds one pixel to each random walk
         '''
-        ss = 3    # set step size
+        
+        
+        ss = 1    # set step size
         (dx, dy) = random.choice([(0, ss), (0, -ss), (ss, 0), (-ss, 0)])
 
         ### Assign to new x and y variables to keep a record of current and future position
-        new_x = self.x + dx
-        new_y = self.y + dy
+        new_x = self.particle.x + dx
+        new_y = self.particle.y + dy
 
         ### Ensure random walk does not disappear off screen, otherwise application quits
         if new_x < 0:
@@ -70,21 +80,34 @@ class Application():
 
         else:
             self.updateFlag = False
-            self.x, self.y = new_x, new_y
+            self.particle.x, self.particle.y = new_x, new_y
 
     def on_render(self):
         '''
         Updates the pixel array IF a particle is allocated to the growing crystal
         '''
+        self.displaySurface.fill((0,0,0,))
+
+        ### Create seed
+        self.pixelArray[self.start_x - 50, self.start_y - 50] = 0xDCDCDC    # Must be same colour as other particles otherwise they won't stick!
+        pygame.display.update()
+
         if self.updateFlag:  
-            self.pixelArray[self.x, self.y] = 0xDCDCDC
+            self.pixelArray[self.particle.x, self.particle.y] = 0xDCDCDC
 
             # Update the display
             pygame.display.update()
 
             # Reset update flag and x, y co-ordinates to restart random walk
             self.updateFlag = False
-            self.x, self.y = self.start_x, self.start_y
+            self.particle.x, self.particle.y = self.start_x, self.start_y
+
+        if not self.updateFlag:
+            self.pixelArray[self.particle.x, self.particle.y] = 0x00FF00
+            pygame.display.update()
+
+        # self.pixelArray[self.x, self.y] = self.pixelColor
+        # pygame.display.update()
 
     def on_execute(self):
         '''
@@ -104,5 +127,5 @@ class Application():
         pygame.quit()
 
 if __name__ == '__main__':
-    test = Application()
+    test = Application(5)
     test.on_execute()
