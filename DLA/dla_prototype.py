@@ -20,6 +20,8 @@ class Application():
         self.x = self.start_x
         self.y = self.start_y 
 
+        self.updateFlag = False
+
     def on_init(self):
         pygame.init()
         pygame.display.set_caption("2D Diffusion Limited Aggregation")
@@ -29,6 +31,10 @@ class Application():
         self.pixelColor = (220, 220, 220)                             # Set pixel colour in RGB
         self.isRunning = True
 
+        ### Create a seed point
+        self.pixelArray[self.start_x - 50, self.start_y - 50] = 0xDCDCDC    # Must be same colour as other particles otherwise they won't stick!
+        pygame.display.update()
+    
     def on_event(self, event):
         '''
         Called during main on_execute() loop which loops over all events continuously during the simulation.
@@ -41,41 +47,44 @@ class Application():
         '''
         Adds one pixel to each random walk
         '''
-        ss = 1    # set step size
+        ss = 3    # set step size
         (dx, dy) = random.choice([(0, ss), (0, -ss), (ss, 0), (-ss, 0)])
 
         ### Assign to new x and y variables to keep a record of current and future position
-        self.x += dx
-        self.y += dy
+        new_x = self.x + dx
+        new_y = self.y + dy
 
         ### Ensure random walk does not disappear off screen, otherwise application quits
-        if self.x < 0:
-            self.x = 0
-        if self.x > (self.width - 1):
-            self.x = self.width - 1
-        if self.y < 0:
-            self.y = 0
-        if self.y > (self.height - 1):
-            self.y = self.height - 1
+        if new_x < 0:
+            new_x = 0
+        if new_x > (self.width - 1):
+            new_x = self.width - 1
+        if new_y < 0:
+            new_y = 0
+        if new_y > (self.height - 1):
+            new_y = self.height - 1
 
         ### Check if pixel has already been covered by walker (need to use hex colour codes)
-        if self.pixelArray[self.x, self.y] == 0xDCDCDC:  # light gray
-            self.pixelColor = (225, 0, 0)
-
-        elif self.pixelArray[self.x, self.y] == 0xFF0000:  # red
-            self.pixelColor = (255, 0, 0)
+        if self.pixelArray[new_x, new_y] == 0xDCDCDC:  # light gray
+            self.updateFlag = True
 
         else:
-            self.pixelColor = (220, 220, 220)
+            self.updateFlag = False
+            self.x, self.y = new_x, new_y
 
     def on_render(self):
         '''
         Updates the pixel array IF a particle is allocated to the growing crystal
         '''
-        self.pixelArray[self.x, self.y] = self.pixelColor
+        if self.updateFlag:  
+            self.pixelArray[self.x, self.y] = 0xDCDCDC
 
-        # Update the display
-        pygame.display.update()
+            # Update the display
+            pygame.display.update()
+
+            # Reset update flag and x, y co-ordinates to restart random walk
+            self.updateFlag = False
+            self.x, self.y = self.start_x, self.start_y
 
     def on_execute(self):
         '''
