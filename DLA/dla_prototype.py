@@ -9,15 +9,13 @@ class Particle():
         self.x = round(width/2)
         self.y = round(height/2) 
 
-        self.stick= False 
-
 
 class Application():
 
     def __init__(self, n):
         # Initialise display surface, set its size and initialise pixel array and colour
         self.displaySurface = None
-        self.size = self.width, self.height = 962, 601      # size of display screen
+        self.size = self.width, self.height = 640, 360      # size of display screen
         self.pixelArray = None
         self.crystalColor = 0xDCDCDC
         
@@ -72,9 +70,6 @@ class Application():
         ss = 1    # set step size
 
         for particle in self.all_particles:
-            if particle.stick:
-                continue
-
             # (dx, dy) = random.choice([(0, ss), (0, -ss), (ss, 0), (-ss, 0)])
             (dx, dy) = random.choice([(0, ss), (0, -ss), (ss, 0), (-ss, 0), (ss, -ss), (-ss, ss), (ss, ss), (-ss,-ss)])
 
@@ -91,6 +86,13 @@ class Application():
                 new_y = self.domainMax_y
             if new_y > self.domainMax_y:
                 new_y = self.domainMin_y
+
+            ### Create seed - must be same colour as other particles or they won't stick!
+            self.pixelArray[self.start_x - 30, self.start_y - 30] = self.crystalColor
+
+            ### Recolour crystal each time
+            for coordinate in self.crystal_position:
+                self.pixelArray[coordinate[0], coordinate[1]] = self.crystalColor
 
             ### Check if pixel has already been covered by walker 
             if self.pixelArray[new_x, new_y] == self.crystalColor:  # light gray
@@ -119,27 +121,21 @@ class Application():
             self.on_render(particle)    # call on_render here to be able to pass in particle attributes x, y
 
         pygame.display.update()
-        self.displaySurface.fill((0,0,0,))      # Removes previous path of particles
+        if self.all_particles:   # List evaluates to False if empty
+            self.displaySurface.fill((0,0,0,))      # Removes previous path of particles
 
 
     def on_render(self, particle):
         '''
         Updates the pixel array if a particle is allocated to the growing crystal, otherwise shows movements of particles on their random walks
         '''
-        ## Create seed - must be same colour as other particles or they won't stick!
-        self.pixelArray[self.start_x - 30, self.start_y - 30] = self.crystalColor
-
-        ### Recolour crystal each time
-        for coordinate in self.crystal_position:
-            self.pixelArray[coordinate[0], coordinate[1]] = self.crystalColor
-
         ### If particle sticks, set its pixel to grey and particle.stick = True stops it from moving any further
         if self.updateFlag:  
             self.crystal_position.append((particle.x, particle.y))
 
             # Reset update flag and x, y co-ordinates to restart random walk
-            self.updateFlag = False
-            particle.stick = True
+            # self.updateFlag = False
+            self.all_particles.remove(particle)
 
         if not self.updateFlag:
             self.pixelArray[particle.x, particle.y] = 0x00FF00   # green
@@ -164,5 +160,5 @@ class Application():
 
 
 if __name__ == '__main__':
-    test = Application(50)
+    test = Application(5)
     test.on_execute()
