@@ -4,13 +4,25 @@ import pygame
 
 class Particle():
 
-    def __init__(self, width, height):
+    def __init__(self, domainMin_x, domainMax_x, domainMin_y, domainMax_y):
         # Set starting co-ordinates
-        self.x = round(width/2)
-        self.y = round(height/2) 
+        self.spawn(domainMin_x, domainMax_x, domainMin_y, domainMax_y)
 
-        self.stick= False 
+    def spawn(self, domainMin_x, domainMax_x, domainMin_y, domainMax_y):
 
+        newSide = random.choice([1, 2, 3, 4])
+        if newSide == 1:
+            self.x = domainMin_x
+            self.y = int(random.uniform(domainMin_y, domainMax_y))
+        elif newSide == 2:
+            self.x = int(random.uniform(domainMin_x, domainMax_x))
+            self.y = domainMin_y
+        elif newSide == 3:
+            self.x = domainMax_x
+            self.y = int(random.uniform(domainMin_y, domainMax_y))
+        else:   # newSide == 4
+            self.x = int(random.uniform(domainMin_x, domainMax_x))
+            self.y = domainMax_y
 
 class Application():
 
@@ -27,24 +39,25 @@ class Application():
         self.start_y = round(self.height/2)  
 
         self.updateFlag = False
-
-        self.all_particles = []
-        for i in range(n):
-            particle = Particle(self.width, self.height)   #  yaaayy composition! 
-            self.all_particles.append(particle)
-
-        self.crystal_position = []
-        
-        # Initialise min and max x, y to define a rectangular crystal domain (limits of crystal)
-        self.min_x, self.min_y = particle.x, particle.y
-        self.max_x, self.max_y = particle.x, particle.y
-        self.padSize = 30
+        self.padSize = 80
 
         # Define a domain that is padSize pixels larger than crystal domain
         self.domainMin_x = self.start_x - self.padSize
         self.domainMax_x = self.start_x + self.padSize
         self.domainMin_y = self.start_y - self.padSize
         self.domainMax_y = self.start_y + self.padSize
+        
+        # Use composition to create n particle instances using the Particle class
+        self.all_particles = []
+        for i in range(n):
+            particle = Particle(self.domainMin_x, self.domainMax_x, self.domainMin_y, self.domainMax_y)    
+            self.all_particles.append(particle)
+        
+        self.crystal_position = []
+
+        # Initialise min and max x, y to define a rectangular crystal domain (limits of crystal)
+        self.min_x, self.min_y = particle.x, particle.y
+        self.max_x, self.max_y = particle.x, particle.y
 
 
     def on_init(self):
@@ -72,10 +85,7 @@ class Application():
         '''
         ss = 1    # set step size
 
-
         for particle in self.all_particles:
-            # if particle.stick:
-            #     continue
 
             # (dx, dy) = random.choice([(0, ss), (0, -ss), (ss, 0), (-ss, 0)])
             (dx, dy) = random.choice([(0, ss), (0, -ss), (ss, 0), (-ss, 0), (ss, -ss), (-ss, ss), (ss, ss), (-ss,-ss)])
@@ -136,12 +146,10 @@ class Application():
         '''
         Updates the pixel array if a particle is allocated to the growing crystal, otherwise shows movement of particle on their random walks
         '''
-        # pygame.draw.circle(self.displaySurface, self.crystalColor, (self.start_x, self.start_y+10), 2)
 
         ### If particle sticks, append its coordinates to list and particle.stick = True stops it from moving any further
         if self.updateFlag:  
             self.crystal_position.append((particle.x, particle.y))
-            particle.stick = True
 
             # Remove particle from all_particles list
             self.all_particles.remove(particle)
@@ -169,5 +177,5 @@ class Application():
 
 
 if __name__ == '__main__':
-    test = Application(100)
+    test = Application(700)
     test.on_execute()
