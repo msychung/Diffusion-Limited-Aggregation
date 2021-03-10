@@ -92,6 +92,13 @@ class Application():
             if new_y > self.domainMax_y:
                 new_y = self.domainMin_y
 
+            ## Create seed - must be same colour as other particles or they won't stick!
+            self.pixelArray[self.start_x - 10, self.start_y - 10] = self.crystalColor
+
+            ### Recolour existing (and growing) crystal each loop iteration
+            # for coordinate in self.crystal_position:
+            #     self.pixelArray[coordinate[0], coordinate[1]] = self.crystalColor
+
             ### Check if pixel has already been covered by walker 
             if self.pixelArray[new_x, new_y] == self.crystalColor:  # light gray
                 self.updateFlag = True
@@ -119,7 +126,8 @@ class Application():
             self.on_render(particle)    # call on_render here to be able to pass in particle attributes x, y
 
         pygame.display.update()
-        self.displaySurface.fill((0,0,0,))      # Removes previous path of particles
+        # if self.all_particles:
+            # self.displaySurface.fill((0,0,0,))      # Removes previous path of particles
 
 
     def on_render(self, particle):
@@ -129,6 +137,8 @@ class Application():
         ## Create seed - must be same colour as other particles or they won't stick!
         self.pixelArray[self.start_x - 30, self.start_y - 30] = self.crystalColor
 
+        # pygame.draw.circle(self.displaySurface, self.crystalColor, (self.start_x, self.start_y+10), 2)
+
         ### Recolour crystal each time
         for coordinate in self.crystal_position:
             self.pixelArray[coordinate[0], coordinate[1]] = self.crystalColor
@@ -136,13 +146,14 @@ class Application():
         ### If particle sticks, set its pixel to grey and particle.stick = True stops it from moving any further
         if self.updateFlag:  
             self.crystal_position.append((particle.x, particle.y))
+            self.pixelArray[particle.x, particle.y] = self.crystalColor
 
-            # Reset update flag and x, y co-ordinates to restart random walk
-            self.updateFlag = False
-            particle.stick = True
+            # Remove particle from all_particles list
+            # self.all_particles.remove(particle)
+            particle.spawn(self.domainMin_x, self.domainMax_x, self.domainMin_y, self.domainMax_y)
 
-        if not self.updateFlag:
-            self.pixelArray[particle.x, particle.y] = 0x00FF00   # green
+        # if not self.updateFlag:
+        #     self.pixelArray[particle.x, particle.y] = 0x00FF00   # green
 
 
     def on_execute(self):
@@ -164,5 +175,5 @@ class Application():
 
 
 if __name__ == '__main__':
-    test = Application(50)
+    test = Application(1000)
     test.on_execute()
