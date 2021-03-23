@@ -93,3 +93,20 @@ Solving the Langevin equation, a continuous stochastic differential equation des
 
 - [ ] Experiment with using the scipy.integrate.solve_ivp package 
 
+## DLA
+### Prototype (dla_prototype.py)
+Simulating 2D Diffusion Limited Aggregation (DLA) using pygame.
+
+##### TO DO
+- [x] Simulate 2D random walks (no seed) in pygame
+
+- [x] Add a seed point 
+
+- [x] Show motion of all particles without motion history
+
+- [ ] Introduce different seed and domain shapes
+
+- [ ] Automate image capture and saving at a specified point of the simulation
+
+### Fractal Dimension (frac_dim.py)
+Calculating the fractal dimension of a DLA image using the Minkowski–Bouligand (box-counting) dimension.
