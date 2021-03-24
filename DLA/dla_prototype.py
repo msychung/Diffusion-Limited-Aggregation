@@ -1,15 +1,22 @@
 import random
+import math
 import numpy as np
 import pygame
 
 class Particle():
 
-    def __init__(self, domainMin_x, domainMax_x, domainMin_y, domainMax_y):
-        # Set starting co-ordinates
-        self.spawn(domainMin_x, domainMax_x, domainMin_y, domainMax_y)
+    def __init__(self, spawn_shape, domainMin_x, domainMax_x, domainMin_y, domainMax_y, start_x, start_y, radius):
+        # Choose a spawn shape
+        if spawn_shape == 'square':
+            self.spawn_shape = self.square_spawn
+            self.square_spawn(domainMin_x, domainMax_x, domainMin_y, domainMax_y, start_x, start_y, radius)
 
-    def spawn(self, domainMin_x, domainMax_x, domainMin_y, domainMax_y):
+        elif spawn_shape == 'circle':
+            self.spawn_shape = self.circle_spawn
+            self.circle_spawn(domainMin_x, domainMax_x, domainMin_y, domainMax_y, start_x, start_y, radius)
 
+    def square_spawn(self, domainMin_x, domainMax_x, domainMin_y, domainMax_y, start_x, start_y, radius):
+        # Randomly choose a side of the square for a particle to spawn along
         newSide = random.choice([1, 2, 3, 4])
         if newSide == 1:
             self.x = domainMin_x
@@ -23,6 +30,15 @@ class Particle():
         else:   # newSide == 4
             self.x = int(random.uniform(domainMin_x, domainMax_x))
             self.y = domainMax_y
+
+    def circle_spawn(self, domainMin_x, domainMax_x, domainMin_y, domainMax_y, start_x, start_y, radius):
+        x0, y0 = start_x, start_y
+        r = radius
+
+        theta = random.random() * 2 * math.pi
+        self.x = x0 + math.cos(theta)*r
+        self.y = y0 + math.sin(theta)*r
+
 
 class Application():
 
@@ -39,20 +55,23 @@ class Application():
         self.start_y = round(self.height/2)  
 
         self.updateFlag = False
-        self.padSize = 80
-
-        # Define a domain that is padSize pixels larger than crystal domain
+        self.padSize = 50
+        
+        # Define a square domain that is padSize pixels larger than crystal domain
         self.domainMin_x = self.start_x - self.padSize
         self.domainMax_x = self.start_x + self.padSize
         self.domainMin_y = self.start_y - self.padSize
         self.domainMax_y = self.start_y + self.padSize
-        
+
+        # Define circle domain radius in pixels
+        self.radius = 20
+
         # Use composition to create n particle instances using the Particle class
         self.all_particles = []
         for i in range(n):
-            particle = Particle(self.domainMin_x, self.domainMax_x, self.domainMin_y, self.domainMax_y)    
+            particle = Particle('circle', self.domainMin_x, self.domainMax_x, self.domainMin_y, self.domainMax_y, self.start_x, self.start_y, self.radius)
             self.all_particles.append(particle)
-        
+
         self.crystal_position = []
 
         # Initialise min and max x, y to define a rectangular crystal domain (limits of crystal)
@@ -79,15 +98,41 @@ class Application():
             self.isRunning = False
 
 
+    def gen_seed(self, particle, seed_shape):
+        '''
+        Create seed - must be same colour as other particles or they won't stick!
+        '''
+        if seed_shape == 'dot':
+            self.pixelArray[self.start_x, self.start_y] = self.crystalColor
+
+        elif seed_shape == 'line':
+            pygame.draw.line(self.displaySurface, self.crystalColor, (self.start_x-50, self.start_y), (self.start_x+50, self.start_y))
+
+        elif seed_shape == 'circle':
+            pygame.draw.circle(self.displaySurface, self.crystalColor, (self.start_x, self.start_y), 30, width=1)
+
+        elif seed_shape == 'ellipse':
+            pygame.draw.ellipse(self.displaySurface, self.crystalColor, ((self.start_x, self.start_y), (32, 20)), width = 1)
+
+        elif seed_shape == 'square':
+            pygame.draw.rect(self.displaySurface, self.crystalColor, ((self.start_x, self.start_y), (50, 50)), width = 1)
+
+        elif seed_shape == 'star':   # because my dad asked me to!
+            x = self.start_x
+            y = self.start_y
+            star_points  = [(x, y-76), (x+20, y-25), (x+73, y-28), (x+28, y+5), (x+42, y+55), (x, y+23), (x-42, y+55), (x-28, y+5), (x-73, y-28), (x-20, y-25)]
+            pygame.draw.polygon(self.displaySurface, self.crystalColor, star_points)
+
+
     def on_loop(self):
         '''
         Adds one pixel to each random walk
         '''
         ss = 1    # set step size
-
+        # print(self.min_x, self.min_y, self.max_x, self.max_y)
         for particle in self.all_particles:
             # (dx, dy) = random.choice([(0, ss), (0, -ss), (ss, 0), (-ss, 0)])
-            (dx, dy) = random.choice([(0, ss), (0, -ss), (ss, 0), (-ss, 0), (ss, -ss), (-ss, ss), (ss, ss), (-ss,-ss)])
+            (dx, dy) = random.choice([(0, ss), (0, -ss), (ss, 0), (-ss, 0), (ss, -ss), (-ss, ss), (ss, ss), (-ss, -ss)])
 
             ### Assign to new x and y variables to keep a record of current and future position
             new_x = particle.x + dx
@@ -103,14 +148,15 @@ class Application():
             if new_y > self.domainMax_y:
                 new_y = self.domainMin_y
 
-            ## Create seed - must be same colour as other particles or they won't stick!
-            self.pixelArray[self.start_x - 10, self.start_y - 10] = self.crystalColor
+            ### Call generate seed method
+            self.gen_seed(particle, 'dot')
 
             ### Recolour existing (and growing) crystal each loop iteration
             for coordinate in self.crystal_position:
                 self.pixelArray[coordinate[0], coordinate[1]] = self.crystalColor
 
             ### Check if pixel has already been covered by walker 
+            # print(new_x, new_y)
             if self.pixelArray[new_x, new_y] == self.crystalColor:  # light gray
                 self.updateFlag = True
 
@@ -137,7 +183,7 @@ class Application():
             self.on_render(particle)    # call on_render here to be able to pass in particle attributes x, y
 
         pygame.display.update()
-
+        
         if self.all_particles:
             self.displaySurface.fill((0,0,0,))      # Removes previous path of particles
 
@@ -150,12 +196,14 @@ class Application():
         ### If particle sticks, append its coordinates to list and particle.stick = True stops it from moving any further
         if self.updateFlag:  
             self.crystal_position.append((particle.x, particle.y))
+            self.pixelArray[particle.x, particle.y] = self.crystalColor
 
-            # Remove particle from all_particles list
-            self.all_particles.remove(particle)
+            ### Remove particle from all_particles list OR respawn from domain square
+            # self.all_particles.remove(particle)
+            particle.spawn_shape(self.domainMin_x, self.domainMax_x, self.domainMin_y, self.domainMax_y, self.start_x, self.start_y, self.radius)
 
         ### Show individual particles moving
-        if not self.updateFlag:
+        if not self.updateFlag: 
             self.pixelArray[particle.x, particle.y] = 0x00FF00   # green
 
 
@@ -178,5 +226,5 @@ class Application():
 
 
 if __name__ == '__main__':
-    test = Application(700)
+    test = Application(1000)
     test.on_execute()
