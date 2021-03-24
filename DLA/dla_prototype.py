@@ -131,7 +131,6 @@ class Application():
         ss = 1    # set step size
         # print(self.min_x, self.min_y, self.max_x, self.max_y)
         for particle in self.all_particles:
-
             # (dx, dy) = random.choice([(0, ss), (0, -ss), (ss, 0), (-ss, 0)])
             (dx, dy) = random.choice([(0, ss), (0, -ss), (ss, 0), (-ss, 0), (ss, -ss), (-ss, ss), (ss, ss), (-ss, -ss)])
 
@@ -191,10 +190,10 @@ class Application():
 
     def on_render(self, particle):
         '''
-        Updates the pixel array if a particle is allocated to the growing crystal, otherwise shows movements of particles on their random walks
+        Updates the pixel array if a particle is allocated to the growing crystal, otherwise shows movement of particle on their random walks
         '''
 
-        ### If particle sticks, set its pixel to grey and particle.stick = True stops it from moving any further
+        ### If particle sticks, append its coordinates to list and particle.stick = True stops it from moving any further
         if self.updateFlag:  
             self.crystal_position.append((particle.x, particle.y))
             self.pixelArray[particle.x, particle.y] = self.crystalColor
@@ -221,7 +220,7 @@ class Application():
                 self.on_event(event)
 
             self.on_loop()
-            # self.on_render()
+            # self.on_render()   # moved to end of on_loop to carry over particle attributes
 
         pygame.quit()
 
