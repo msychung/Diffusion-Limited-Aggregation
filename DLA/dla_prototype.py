@@ -31,7 +31,7 @@ class Application():
         self.displaySurface = None
         self.size = self.width, self.height = 640, 360      # size of display screen
         self.pixelArray = None
-        self.crystalColor = 0xDCDCDC
+        self.crystalColor = 0xDCDCDC        # grey
         self.n = n
         
         # Set starting co-ordinates
@@ -56,8 +56,8 @@ class Application():
         self.crystal_position = []
 
         # Initialise min and max x, y to define a rectangular crystal domain (limits of crystal)
-        self.min_x, self.min_y = particle.x, particle.y
-        self.max_x, self.max_y = particle.x, particle.y
+        self.min_x, self.min_y = self.start_x, self.start_y
+        self.max_x, self.max_y = self.start_x, self.start_y
 
 
     def on_init(self):
@@ -138,6 +138,7 @@ class Application():
             self.on_render(particle)    # call on_render here to be able to pass in particle attributes x, y
 
         pygame.display.update()
+
         if self.all_particles:
             self.displaySurface.fill((0,0,0,))      # Removes previous path of particles
 
@@ -154,6 +155,7 @@ class Application():
             # Remove particle from all_particles list
             self.all_particles.remove(particle)
 
+        ### Show individual particles moving
         if not self.updateFlag:
             self.pixelArray[particle.x, particle.y] = 0x00FF00   # green
 
