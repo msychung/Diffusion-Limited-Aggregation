@@ -86,7 +86,6 @@ class Application():
         ss = 1    # set step size
 
         for particle in self.all_particles:
-
             # (dx, dy) = random.choice([(0, ss), (0, -ss), (ss, 0), (-ss, 0)])
             (dx, dy) = random.choice([(0, ss), (0, -ss), (ss, 0), (-ss, 0), (ss, -ss), (-ss, ss), (ss, ss), (-ss,-ss)])
 
