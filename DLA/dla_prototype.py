@@ -5,39 +5,39 @@ import pygame
 
 class Particle():
 
-    def __init__(self, spawn_shape, domainMin_x, domainMax_x, domainMin_y, domainMax_y, start_x, start_y, radius):
+    def __init__(self, spawn_shape, sqdomainMin_x, sqdomainMax_x, sqdomainMin_y, sqdomainMax_y, start_x, start_y, radius):
         # Choose a spawn shape
         if spawn_shape == 'square':
             self.spawn_shape = self.square_spawn
-            self.square_spawn(domainMin_x, domainMax_x, domainMin_y, domainMax_y, start_x, start_y, radius)
+            self.square_spawn(sqdomainMin_x, sqdomainMax_x, sqdomainMin_y, sqdomainMax_y, start_x, start_y, radius)
 
         elif spawn_shape == 'circle':
             self.spawn_shape = self.circle_spawn
-            self.circle_spawn(domainMin_x, domainMax_x, domainMin_y, domainMax_y, start_x, start_y, radius)
+            self.circle_spawn(sqdomainMin_x, sqdomainMax_x, sqdomainMin_y, sqdomainMax_y, start_x, start_y, radius)
 
-    def square_spawn(self, domainMin_x, domainMax_x, domainMin_y, domainMax_y, start_x, start_y, radius):
+    def square_spawn(self, sqdomainMin_x, sqdomainMax_x, sqdomainMin_y, sqdomainMax_y, start_x, start_y, radius):
         # Randomly choose a side of the square for a particle to spawn along
         newSide = random.choice([1, 2, 3, 4])
         if newSide == 1:
-            self.x = domainMin_x
-            self.y = int(random.uniform(domainMin_y, domainMax_y))
+            self.x = sqdomainMin_x
+            self.y = int(random.uniform(sqdomainMin_y, sqdomainMax_y))
         elif newSide == 2:
-            self.x = int(random.uniform(domainMin_x, domainMax_x))
-            self.y = domainMin_y
+            self.x = int(random.uniform(sqdomainMin_x, sqdomainMax_x))
+            self.y = sqdomainMin_y
         elif newSide == 3:
-            self.x = domainMax_x
-            self.y = int(random.uniform(domainMin_y, domainMax_y))
+            self.x = sqdomainMax_x
+            self.y = int(random.uniform(sqdomainMin_y, sqdomainMax_y))
         else:   # newSide == 4
-            self.x = int(random.uniform(domainMin_x, domainMax_x))
-            self.y = domainMax_y
+            self.x = int(random.uniform(sqdomainMin_x, sqdomainMax_x))
+            self.y = sqdomainMax_y
 
-    def circle_spawn(self, domainMin_x, domainMax_x, domainMin_y, domainMax_y, start_x, start_y, radius):
+    def circle_spawn(self, sqdomainMin_x, sqdomainMax_x, sqdomainMin_y, sqdomainMax_y, start_x, start_y, radius):
         x0, y0 = start_x, start_y
         r = radius
 
         theta = random.random() * 2 * math.pi
-        self.x = x0 + math.cos(theta)*r
-        self.y = y0 + math.sin(theta)*r
+        self.x = int(x0 + math.cos(theta)*r)
+        self.y = int(y0 + math.sin(theta)*r)
 
 
 class Application():
@@ -50,7 +50,12 @@ class Application():
         self.crystalColor = 0xDCDCDC        # grey
         self.n = n
         
-        # Set starting co-ordinates
+        # Set seed, spawn and domain shapes
+        self.seed_shape = 'dot'
+        self.spawn_shape = 'square'
+        self.domain_shape = 'square'
+
+        # Set centre co-ordinates
         self.start_x = round(self.width/2)
         self.start_y = round(self.height/2)  
 
@@ -58,18 +63,18 @@ class Application():
         self.padSize = 50
         
         # Define a square domain that is padSize pixels larger than crystal domain
-        self.domainMin_x = self.start_x - self.padSize
-        self.domainMax_x = self.start_x + self.padSize
-        self.domainMin_y = self.start_y - self.padSize
-        self.domainMax_y = self.start_y + self.padSize
+        self.sqdomainMin_x = self.start_x - self.padSize
+        self.sqdomainMax_x = self.start_x + self.padSize
+        self.sqdomainMin_y = self.start_y - self.padSize
+        self.sqdomainMax_y = self.start_y + self.padSize
 
         # Define circle domain radius in pixels
-        self.radius = 20
+        self.radius = 50
 
         # Use composition to create n particle instances using the Particle class
         self.all_particles = []
         for i in range(n):
-            particle = Particle('circle', self.domainMin_x, self.domainMax_x, self.domainMin_y, self.domainMax_y, self.start_x, self.start_y, self.radius)
+            particle = Particle(self.spawn_shape, self.sqdomainMin_x, self.sqdomainMax_x, self.sqdomainMin_y, self.sqdomainMax_y, self.start_x, self.start_y, self.radius)
             self.all_particles.append(particle)
 
         self.crystal_position = []
@@ -138,25 +143,17 @@ class Application():
             new_x = particle.x + dx
             new_y = particle.y + dy
 
-            ### Wrap-around: ensure random walk does not disappear off screen, otherwise application quits
-            if new_x < self.domainMin_x:
-                new_x = self.domainMax_x
-            if new_x > self.domainMax_x:
-                new_x = self.domainMin_x
-            if new_y < self.domainMin_y:
-                new_y = self.domainMax_y
-            if new_y > self.domainMax_y:
-                new_y = self.domainMin_y
+            ### Call wrap_around method to wrap around movement around based on a chosen domain shape
+            new_x, new_y = self.wrap_around(self.domain_shape, new_x, new_y)
 
-            ### Call generate seed method
-            self.gen_seed(particle, 'dot')
+            ### Call the generate seed method based on a chosen seed shape
+            self.gen_seed(particle, self.seed_shape)
 
             ### Recolour existing (and growing) crystal each loop iteration
             for coordinate in self.crystal_position:
                 self.pixelArray[coordinate[0], coordinate[1]] = self.crystalColor
 
             ### Check if pixel has already been covered by walker 
-            # print(new_x, new_y)
             if self.pixelArray[new_x, new_y] == self.crystalColor:  # light gray
                 self.updateFlag = True
 
@@ -171,10 +168,10 @@ class Application():
                     self.max_y = particle.y
                     
                 # Ensure domain minima and maxima never less/more than 1
-                self.domainMin_x = max([self.min_x - self.padSize, 1])
-                self.domainMax_x = min([self.max_x + self.padSize, self.width - 1])
-                self.domainMin_y = max([self.min_y - self.padSize, 1])
-                self.domainMax_y = min([self.max_y + self.padSize, self.width - 1])
+                self.sqdomainMin_x = max([self.min_x - self.padSize, 1])
+                self.sqdomainMax_x = min([self.max_x + self.padSize, self.width - 1])
+                self.sqdomainMin_y = max([self.min_y - self.padSize, 1])
+                self.sqdomainMax_y = min([self.max_y + self.padSize, self.width - 1])
 
             else:
                 self.updateFlag = False
@@ -186,6 +183,31 @@ class Application():
         
         if self.all_particles:
             self.displaySurface.fill((0,0,0,))      # Removes previous path of particles
+
+
+    def wrap_around(self, domain_shape, new_x, new_y):
+            '''
+            Wrap-around: ensure random walk does not disappear off square screen, otherwise application quits
+            '''
+            if domain_shape == 'square':
+                if new_x < self.sqdomainMin_x:
+                    new_x = self.sqdomainMax_x
+                if new_x > self.sqdomainMax_x:
+                    new_x = self.sqdomainMin_x
+                if new_y < self.sqdomainMin_y:
+                    new_y = self.sqdomainMax_y
+                if new_y > self.sqdomainMax_y:
+                    new_y = self.sqdomainMin_y
+        
+            elif domain_shape == 'circle':
+                sqx = new_x**2
+                sqy = new_y**2
+                r = math.sqrt(sqx + sqy)
+                if r > self.radius:
+                    new_x = self.start_x - new_x
+                    new_y = self.start_y - new_y
+
+            return new_x, new_y
 
 
     def on_render(self, particle):
@@ -200,7 +222,7 @@ class Application():
 
             ### Remove particle from all_particles list OR respawn from domain square
             # self.all_particles.remove(particle)
-            particle.spawn_shape(self.domainMin_x, self.domainMax_x, self.domainMin_y, self.domainMax_y, self.start_x, self.start_y, self.radius)
+            particle.spawn_shape(self.sqdomainMin_x, self.sqdomainMax_x, self.sqdomainMin_y, self.sqdomainMax_y, self.start_x, self.start_y, self.radius)
 
         ### Show individual particles moving
         if not self.updateFlag: 
@@ -226,5 +248,5 @@ class Application():
 
 
 if __name__ == '__main__':
-    test = Application(1000)
+    test = Application(2)
     test.on_execute()
