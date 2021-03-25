@@ -16,7 +16,7 @@ class Particle():
             self.circle_spawn(sqdomainMin_x, sqdomainMax_x, sqdomainMin_y, sqdomainMax_y, start_x, start_y, radius)
 
     def square_spawn(self, sqdomainMin_x, sqdomainMax_x, sqdomainMin_y, sqdomainMax_y, start_x, start_y, radius):
-        # Randomly choose a side of the square for a particle to spawn along
+        # Randomly choose a position on a side of a square for a particle to spawn along
         newSide = random.choice([1, 2, 3, 4])
         if newSide == 1:
             self.x = sqdomainMin_x
@@ -32,6 +32,7 @@ class Particle():
             self.y = sqdomainMax_y
 
     def circle_spawn(self, sqdomainMin_x, sqdomainMax_x, sqdomainMin_y, sqdomainMax_y, start_x, start_y, radius):
+        # Randomly choose a position on a circle of radius r for the particle to spawn on
         x0, y0 = start_x, start_y
         r = radius
 
@@ -60,7 +61,7 @@ class Application():
         self.start_y = round(self.height/2)  
 
         self.updateFlag = False
-        self.padSize = 50
+        self.padSize = 20
         
         # Define a square domain that is padSize pixels larger than crystal domain
         self.sqdomainMin_x = self.start_x - self.padSize
@@ -69,7 +70,9 @@ class Application():
         self.sqdomainMax_y = self.start_y + self.padSize
 
         # Define circle domain radius in pixels
-        self.radius = 50
+        self.radius = 80
+
+        self.crystal_size_limit = 30
 
         # Use composition to create n particle instances using the Particle class
         self.all_particles = []
@@ -77,6 +80,7 @@ class Application():
             particle = Particle(self.spawn_shape, self.sqdomainMin_x, self.sqdomainMax_x, self.sqdomainMin_y, self.sqdomainMax_y, self.start_x, self.start_y, self.radius)
             self.all_particles.append(particle)
 
+        # Create an empty list to store the positions (x and y) of the pixels forming the growing crystal
         self.crystal_position = []
 
         # Initialise min and max x, y to define a rectangular crystal domain (limits of crystal)
@@ -86,12 +90,14 @@ class Application():
 
     def on_init(self):
         pygame.init()
-        pygame.display.set_caption("2D Diffusion Limited Aggregation")
+        pygame.display.set_caption("2D Diffusion Limited Aggregation")      # Window title
 
         self.displaySurface = pygame.display.set_mode(self.size)      # Create display surface
         self.pixelArray = pygame.PixelArray(self.displaySurface)      # Create pixel array
 
         self.isRunning = True
+
+        self.start_time = pygame.time.get_ticks()       # Set a timer
     
 
     def on_event(self, event):
@@ -100,6 +106,8 @@ class Application():
         '''
         ### In the event we want to quit the game
         if event.type == pygame.QUIT:
+            time = pygame.time.get_ticks() - self.start_time
+            print("A total of", time/1000, "seconds have elapsed.")
             self.isRunning = False
 
 
@@ -150,8 +158,8 @@ class Application():
             self.gen_seed(particle, self.seed_shape)
 
             ### Recolour existing (and growing) crystal each loop iteration
-            for coordinate in self.crystal_position:
-                self.pixelArray[coordinate[0], coordinate[1]] = self.crystalColor
+            # for coordinate in self.crystal_position:
+            #     self.pixelArray[coordinate[0], coordinate[1]] = self.crystalColor
 
             ### Check if pixel has already been covered by walker 
             if self.pixelArray[new_x, new_y] == self.crystalColor:  # light gray
@@ -166,12 +174,8 @@ class Application():
                     self.min_y = particle.y
                 if particle.y > self.max_y:
                     self.max_y = particle.y
-                    
-                # Ensure domain minima and maxima never less/more than 1
-                self.sqdomainMin_x = max([self.min_x - self.padSize, 1])
-                self.sqdomainMax_x = min([self.max_x + self.padSize, self.width - 1])
-                self.sqdomainMin_y = max([self.min_y - self.padSize, 1])
-                self.sqdomainMax_y = min([self.max_y + self.padSize, self.width - 1])
+                
+                self.restrict_domain(self.domain_shape)
 
             else:
                 self.updateFlag = False
@@ -181,34 +185,50 @@ class Application():
 
         pygame.display.update()
         
-        if self.all_particles:
-            self.displaySurface.fill((0,0,0,))      # Removes previous path of particles
+        # if self.all_particles:
+        #     self.displaySurface.fill((0,0,0,))      # Removes previous path of particles
 
 
     def wrap_around(self, domain_shape, new_x, new_y):
-            '''
-            Wrap-around: ensure random walk does not disappear off square screen, otherwise application quits
-            '''
-            if domain_shape == 'square':
-                if new_x < self.sqdomainMin_x:
-                    new_x = self.sqdomainMax_x
-                if new_x > self.sqdomainMax_x:
-                    new_x = self.sqdomainMin_x
-                if new_y < self.sqdomainMin_y:
-                    new_y = self.sqdomainMax_y
-                if new_y > self.sqdomainMax_y:
-                    new_y = self.sqdomainMin_y
+        '''
+        Wrap-around: ensure random walk does not disappear off square screen, otherwise application quits
+        '''
+        if domain_shape == 'square':
+            if new_x < self.sqdomainMin_x:
+                new_x = self.sqdomainMax_x
+            if new_x > self.sqdomainMax_x:
+                new_x = self.sqdomainMin_x
+            if new_y < self.sqdomainMin_y:
+                new_y = self.sqdomainMax_y
+            if new_y > self.sqdomainMax_y:
+                new_y = self.sqdomainMin_y
+    
+        elif domain_shape == 'circle':
+            sqx = (new_x - self.start_x)**2
+            sqy = (new_y - self.start_y)**2
+            r = math.sqrt(sqx + sqy)
+            if r > self.radius:
+                new_x = self.start_x / self.radius * r
+                new_y = self.start_y / self.radius * r
+                # new_x = self.start_x - (new_x - self.start_x)
+                # new_y = self.start_y - (new_y - self.start_y)
         
-            elif domain_shape == 'circle':
-                sqx = new_x**2
-                sqy = new_y**2
-                r = math.sqrt(sqx + sqy)
-                if r > self.radius:
-                    new_x = self.start_x - new_x
-                    new_y = self.start_y - new_y
+        # print(round(r), new_x, new_y)
+        return new_x, new_y
 
-            return new_x, new_y
+    def restrict_domain(self, domain_shape):
+        '''
+        Ensure domain minima and maxima never extend beyond the screen boundaries
+        '''
+        if domain_shape == 'square':
+            self.sqdomainMin_x = max([self.min_x - self.padSize, 1])
+            self.sqdomainMax_x = min([self.max_x + self.padSize, self.width - 1])
+            self.sqdomainMin_y = max([self.min_y - self.padSize, 1])
+            self.sqdomainMax_y = min([self.max_y + self.padSize, self.width - 1])
 
+        elif domain_shape == 'circle':
+            pass
+            
 
     def on_render(self, particle):
         '''
@@ -217,16 +237,27 @@ class Application():
 
         ### If particle sticks, append its coordinates to list and particle.stick = True stops it from moving any further
         if self.updateFlag:  
+
+            ### Freeze animation if crystal grows to a specified size
+            x = particle.x - self.start_x
+            y = particle.y - self.start_y
+            distance = math.sqrt(x**2 + y**2)
+            if distance > self.crystal_size_limit:
+                pygame.time.wait(1000000)
+
             self.crystal_position.append((particle.x, particle.y))
             self.pixelArray[particle.x, particle.y] = self.crystalColor
 
             ### Remove particle from all_particles list OR respawn from domain square
             # self.all_particles.remove(particle)
+            ### Recycle the particle once it's stuck
             particle.spawn_shape(self.sqdomainMin_x, self.sqdomainMax_x, self.sqdomainMin_y, self.sqdomainMax_y, self.start_x, self.start_y, self.radius)
 
+
         ### Show individual particles moving
-        if not self.updateFlag: 
-            self.pixelArray[particle.x, particle.y] = 0x00FF00   # green
+        # if not self.updateFlag: 
+        #     self.pixelArray[particle.x, particle.y] = 0x00FF00   # green
+
 
 
     def on_execute(self):
@@ -248,5 +279,5 @@ class Application():
 
 
 if __name__ == '__main__':
-    test = Application(2)
+    test = Application(300)
     test.on_execute()
