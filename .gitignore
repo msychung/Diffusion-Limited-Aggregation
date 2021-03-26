@@ -129,3 +129,4 @@ dmypy.json
 .pyre/
 ideas/~WRL1782.tmp
 ideas/~WRL0005.tmp
+.vscode/settings.json

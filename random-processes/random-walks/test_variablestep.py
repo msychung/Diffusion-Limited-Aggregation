@@ -1,5 +1,6 @@
-from variablestep import Variable_Step
+from variablestep import Variable_Step, random
 import pytest
+random.seed(5)   # Random seed used to create reproducibility of results and generate numbers to write the below tests. 
 
 @pytest.fixture
 def walk():
