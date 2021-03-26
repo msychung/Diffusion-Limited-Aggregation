@@ -5,8 +5,6 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 from cycler import cycler
 import random
-# from numpy import random
-# from random import random
 plt.style.use('seaborn-whitegrid')
 
 class Constant_Step():
@@ -65,58 +63,49 @@ class Constant_Step():
 
         ### Create lists of zeros of length N and set first value to 0
         
-        ss = self.ss
-        x = self.x
-        y = self.y
-        z = self.z
-        distances = self.distances
-        
         if dimension == '1D':
             for i in range(1, self.N):
-                step = random.choice([-ss, ss])
+                step = random.choice([-self.ss, self.ss])
+                self.x[i] = self.x[i-1] + step
+                self.distances[i] = math.sqrt(self.x[i]**2)
 
-                x[i] = x[i-1] + step
-                distances[i] = math.sqrt(x[i]**2)
-
-            coord_1D = x[-1]
-
+            coord_1D = self.x[-1]
+        
             ### Only run this if doing a single iteration!
-            # print('Destination co-ordinates =', coord_1D, ', Distance =', distances[-1])
+            # print('Destination co-ordinates =', coord_1D, ', Distance =', self.distances[-1])
 
-            return x, coord_1D, distances[-1]
+            return coord_1D
 
 
         elif dimension == '2D':
             for i in range(1, self.N):
-                (dx, dy) = random.choice([(0, ss), (0, -ss), (ss, 0), (-ss, 0)])
+                (dx, dy) = random.choice([(0, self.ss), (0, -self.ss), (self.ss, 0), (-self.ss, 0)])
+                self.x[i] = self.x[i-1] + dx
+                self.y[i] = self.y[i-1] + dy
+                self.distances[i] = math.sqrt(self.x[i]**2 + self.y[i]**2)
 
-                x[i] = x[i-1] + dx
-                y[i] = y[i-1] + dy
-                distances[i] = math.sqrt(x[i]**2 + y[i]**2)
-
-            coord_2D = (x[-1], y[-1])
+            coord_2D = (self.x[-1], self.y[-1])
 
             ### Only run this if doing a single iteration!
-            # print('Destination co-ordinates =', coord_2D, ', Distance =', distances[-1])
+            # print('Destination co-ordinates =', coord_2D, ', Distance =', self.distances[-1])
 
-            return x, y, coord_2D, distances
+            return coord_2D
 
 
         else:   # dimension == '3D'
             for i in range(1, self.N):
-                (dx, dy, dz) = random.choice([(ss, 0, 0), (-ss, 0, 0), (0, ss, 0), (0, -ss, 0), (0, 0, ss), (0, 0, -ss)])
+                (dx, dy, dz) = random.choice([(self.ss, 0, 0), (-self.ss, 0, 0), (0, self.ss, 0), (0, -self.ss, 0), (0, 0, self.ss), (0, 0, -self.ss)])
+                self.x[i] = self.x[i-1] + dx
+                self.y[i] = self.y[i-1] + dy
+                self.z[i] = self.z[i-1] + dz
+                self.distances[i] = math.sqrt(self.x[i]**2 + self.y[i]**2 + self.z[i]**2)
 
-                x[i] = x[i-1] + dx
-                y[i] = y[i-1] + dy
-                z[i] = z[i-1] + dz
-                distances[i] = math.sqrt(x[i]**2 + y[i]**2 + z[i]**2)
-
-            coord_3D = (x[-1], y[-1], z[-1])
+            coord_3D = (self.x[-1], self.y[-1], self.z[-1])
             
             ### Only run this if doing a single iteration!
-            # print('Destination co-ordinates =', coord_3D, ', Distance =', distances[-1])
+            # print('Destination co-ordinates =', coord_3D, ', Distance =', self.distances[-1])
 
-            return x, y, z, coord_3D, distances
+            return coord_3D
 
 
     def calc_displacements(self, dimension):
@@ -133,8 +122,7 @@ class Constant_Step():
 
         if dimension == '1D':
             for i in range(self.iterations):
-                coord_1D = self.gen_random_walk('1D')[1]
-
+                coord_1D = self.gen_random_walk('1D')
                 all_coord += coord_1D
                 all_coord_sq += coord_1D**2
 
@@ -143,10 +131,12 @@ class Constant_Step():
 
             print(f"For {self.iterations} iterations and {self.N} steps, the average displacement is {av_disp} and the root-mean-squared displacement is {rms_disp}. The value of (root of N)*(step size) is {self.ss*math.sqrt(self.N)}.")
 
+            return av_disp, rms_disp
+
 
         elif dimension == '2D':
             for i in range(self.iterations):
-                coord_2D = self.gen_random_walk('2D')[2]
+                coord_2D = self.gen_random_walk('2D')
                 x, y = coord_2D[0], coord_2D[1]
 
                 all_xcoord += x
@@ -159,10 +149,12 @@ class Constant_Step():
 
             print(f"For {self.iterations} iterations and {self.N} steps, the average displacement is {av_disp} and the root-mean-squared displacement is {rms_disp}. The value of (root of N)*(step size) is {self.ss*math.sqrt(self.N)}.")
 
+            return av_disp, rms_disp
+
 
         else:   # dimension == '3D'
             for i in range(self.iterations):
-                coord_3D = self.gen_random_walk('3D')[3]
+                coord_3D = self.gen_random_walk('3D')
                 x, y, z = coord_3D[0], coord_3D[1], coord_3D[2]
 
                 all_xcoord += x
@@ -176,6 +168,8 @@ class Constant_Step():
 
             print(f"For {self.iterations} iterations and {self.N} steps, the average displacement is {av_disp} and the root-mean-squared displacement is {rms_disp}. The value of (root of N)*(step size) is {self.ss*math.sqrt(self.N)}.")
 
+            return av_disp, rms_disp
+
 
     def plot_random_walk(self, dimension):
         '''
@@ -186,17 +180,16 @@ class Constant_Step():
         dimension : str
             Selects which array is returned based on number of random variables
         '''
-
         steps = list(range(self.N))
 
         if dimension == '1D':
             ### Unpack return arguments and create time list
-            x, coord_1D, distances = self.gen_random_walk('1D')
+            coord_1D = self.gen_random_walk('1D')
 
             fig, ax = plt.subplots(2, 1)
             fig.set_size_inches(8, 6)
             ### Plot no. of steps against x
-            ax[0].plot(steps, x, marker='o', markersize=0.5, linewidth=0)
+            ax[0].plot(steps, self.x, marker='o', markersize=0.5, linewidth=0)
             ax[0].set(xlabel='Number of steps', ylabel='Random Variable $X(t)$', title='1D Brownian Motion Path for Fixed Step Size')
 
             ### Plot no. of steps against distance
@@ -208,16 +201,16 @@ class Constant_Step():
 
         elif dimension == '2D':
             ### Unpack return arguments
-            x, y, coord_2D, distances = self.gen_random_walk('2D')
+            coord_2D = self.gen_random_walk('2D')
 
             fig, ax = plt.subplots(2, 1)
             fig.set_size_inches(8, 6)
             ### Plot x against y
-            ax[0].plot(x, y, marker='o', markersize=1, linewidth=0.3)
+            ax[0].plot(self.x, self.y, marker='o', markersize=1, linewidth=0.3)
             ax[0].set(xlabel='Random Variable $X(t)$', ylabel='Random Variable $Y(t)$', title='2D Brownian Motion Path for Fixed Step Size')
 
             ### Plot no. of steps against distance
-            ax[1].plot(steps, distances, marker='o', markersize=0.5, linewidth=0)
+            ax[1].plot(steps, self.distances, marker='o', markersize=0.5, linewidth=0)
             ax[1].set(xlabel='Number of steps', ylabel='Distance', title='2D Distance with Number of Steps')
             plt.tight_layout()
             plt.show() 
@@ -225,19 +218,19 @@ class Constant_Step():
 
         else:   # dimension = '3D'
             ### Unpack return arguments
-            x, y, z, coord_3D, distances = self.gen_random_walk('3D')
+            coord_3D = self.gen_random_walk('3D')
 
             ### Plot x against y and z
             fig = plt.figure()
             ax = fig.add_subplot(1, 1, 1, projection='3d')
-            ax.plot(x, y, z, marker='o', markersize=0.5, linewidth=0)
+            ax.plot(self.x, self.y, self.z, marker='o', markersize=0.5, linewidth=0)
             ax.set(xlabel='Random Variable $X(t)$', ylabel='Random Variable $Y(t)$', zlabel='Random Variable $Z(t)$', title='3D Brownian Motion Path for Fixed Step Size')
             plt.show()  
 
             ### Plot no. of steps against distance
             fig, ax = plt.figure(), plt.axes()
             fig.set_size_inches(9, 5)
-            ax.plot(steps, distances, marker='o', markersize=0.5, linewidth=0)
+            ax.plot(steps, self.distances, marker='o', markersize=0.5, linewidth=0)
             ax.set(xlabel='Number of steps', ylabel='Distance', title='3D Distance with Number of Steps')
             plt.tight_layout()
             plt.show() 
@@ -245,7 +238,7 @@ class Constant_Step():
 
 if __name__ == '__main__':
     ### Call method with dimension parameter
-    test = Constant_Step(2000, 1, 7000)
+    test = Constant_Step(2000, 1, 1000)
     # test.gen_random_walk('3D')
-    test.calc_displacements('1D')
+    # test.calc_displacements('3D')
     # test.plot_random_walk('3D')
