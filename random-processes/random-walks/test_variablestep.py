@@ -16,7 +16,7 @@ def test_variable_step_init(walk):
     assert walk.N == 5
     assert walk.M == 3
     assert walk.iterations == 10
-    assert round(walk.dt) == 5
+    assert walk.dt == 5
     assert len(walk.t) == 5
 
 def test_brownian_1D_loop(walk):
@@ -31,9 +31,13 @@ def test_brownian_2D_loop(walk):
 def test_brownian_2D_vec(walk):
     assert len(walk.brownian_2D_vec()['Time']) == 5
 
+def test_brownian_3D_loop(walk):
+    assert len(walk.brownian_3D_loop()['x']) == 5
+
 def test_brownian_3D_vec(walk):
     assert len(walk.brownian_3D_vec()['Time']) == 5
 
 def test_calc_displacements(walk):
     assert round(walk.calc_displacements('1D'), 1) == 2.4
     assert round(walk.calc_displacements('2D'), 1) == 2.1
+    assert round(walk.calc_displacements('3D'), 1) == -4.5
