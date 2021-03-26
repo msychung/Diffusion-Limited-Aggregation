@@ -25,22 +25,6 @@ def particle_circle():
     radius = 50
     return Particle(spawn_shape, sqdomainMin_x, sqdomainMax_x, sqdomainMin_y, sqdomainMax_y, start_x, start_y, radius)
 
-
-def test_particle_init(particle_square, particle_circle):
-    assert particle_square.spawn_shape == particle_square.square_spawn
-    assert particle_circle.spawn_shape == particle_circle.circle_spawn
-
-    with pytest.raises(Exception):
-        Particle('hexagon', 1, 1, 1, 1, 1, 1, 1)
-
-def test_particle_square_spawn():
-    pass
-
-def test_particle_circle_spawn():
-    pass
-
-
-
 @pytest.fixture
 def application():
     n = 100
@@ -52,6 +36,20 @@ def application():
     crystal_size_limit = 100
     return Application(n, seed_shape, spawn_shape, domain_shape, padSize, radius, crystal_size_limit)
 
+def test_particle_init(particle_square, particle_circle):
+    assert particle_square.spawn_shape == particle_square.square_spawn
+    assert particle_circle.spawn_shape == particle_circle.circle_spawn
+
+    with pytest.raises(Exception):
+        Particle('hexagon', 1, 1, 1, 1, 1, 1, 1)
+
+def test_particle_square_spawn(particle_square):
+    assert isinstance(particle_square.x, int)
+    assert isinstance(particle_square.y, int)
+
+def test_particle_circle_spawn(particle_circle):
+    assert isinstance(particle_circle.x, int)
+    assert isinstance(particle_circle.y, int)
 
 def test_application_init(application):
     assert application.displaySurface == None
@@ -81,4 +79,22 @@ def test_application_init(application):
     assert application.min_y == 180
     assert application.max_y == 180
 
-    
+def test_gen_seed(application, particle_square):
+    with pytest.raises(Exception):
+        application.gen_seed(particle_square, 'test')
+
+@pytest.mark.parametrize('shape, new_x, new_y, expected_x, expected_y', [
+    ('square', 230, 120, 390, 120),
+    ('square', 300, 50, 300, 250),
+    ('square', 420, 160, 250, 160),
+    ('square', 270, 300, 270, 110)
+])
+
+def test_wrap_around(application, shape, new_x, new_y, expected_x, expected_y):
+    assert application.wrap_around(shape, new_x, new_y) == (expected_x, expected_y) # Needs to be extended to circle shape too...
+
+def test_restrict_domain(application):
+    assert application.sqdomainMin_x == 250
+    assert application.sqdomainMax_x == 390
+    assert application.sqdomainMin_y == 110
+    assert application.sqdomainMax_y == 250
