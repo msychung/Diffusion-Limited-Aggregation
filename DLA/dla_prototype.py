@@ -14,6 +14,9 @@ class Particle():
         elif spawn_shape == 'circle':
             self.spawn_shape = self.circle_spawn
             self.circle_spawn(sqdomainMin_x, sqdomainMax_x, sqdomainMin_y, sqdomainMax_y, start_x, start_y, radius)
+        
+        else:
+            raise Exception("Invalid spawn shape, please enter either 'square' or 'circle'.")
 
     def square_spawn(self, sqdomainMin_x, sqdomainMax_x, sqdomainMin_y, sqdomainMax_y, start_x, start_y, radius):
         # Randomly choose a position on a side of a square for a particle to spawn along
@@ -43,7 +46,7 @@ class Particle():
 
 class Application():
 
-    def __init__(self, n):
+    def __init__(self, n, seed_shape, spawn_shape, domain_shape, padSize, radius, crystal_size_limit):
         # Initialise display surface, set its size and initialise pixel array and colour
         self.displaySurface = None
         self.size = self.width, self.height = 640, 360      # size of display screen
@@ -52,16 +55,16 @@ class Application():
         self.n = n
         
         # Set seed, spawn and domain shapes
-        self.seed_shape = 'dot'
-        self.spawn_shape = 'square'
-        self.domain_shape = 'square'
+        self.seed_shape = seed_shape
+        self.spawn_shape = spawn_shape
+        self.domain_shape = domain_shape
 
         # Set centre co-ordinates
         self.start_x = round(self.width/2)
         self.start_y = round(self.height/2)  
 
         self.updateFlag = False
-        self.padSize = 20
+        self.padSize = padSize
         
         # Define a square domain that is padSize pixels larger than crystal domain
         self.sqdomainMin_x = self.start_x - self.padSize
@@ -70,9 +73,9 @@ class Application():
         self.sqdomainMax_y = self.start_y + self.padSize
 
         # Define circle domain radius in pixels
-        self.radius = 80
+        self.radius = radius
 
-        self.crystal_size_limit = 30
+        self.crystal_size_limit = crystal_size_limit
 
         # Use composition to create n particle instances using the Particle class
         self.all_particles = []
@@ -135,6 +138,9 @@ class Application():
             y = self.start_y
             star_points  = [(x, y-76), (x+20, y-25), (x+73, y-28), (x+28, y+5), (x+42, y+55), (x, y+23), (x-42, y+55), (x-28, y+5), (x-73, y-28), (x-20, y-25)]
             pygame.draw.polygon(self.displaySurface, self.crystalColor, star_points)
+        
+        else:
+            raise Exception("Invalid seed shape, please enter either 'dot', 'line', 'circle', 'ellipse', 'square' or 'star'.")
 
 
     def on_loop(self):
@@ -243,7 +249,9 @@ class Application():
             y = particle.y - self.start_y
             distance = math.sqrt(x**2 + y**2)
             if distance > self.crystal_size_limit:
-                pygame.time.wait(1000000)
+                pygame.quit()
+                exit()
+                # pygame.time.wait(10000)
 
             self.crystal_position.append((particle.x, particle.y))
             self.pixelArray[particle.x, particle.y] = self.crystalColor
@@ -279,5 +287,5 @@ class Application():
 
 
 if __name__ == '__main__':
-    test = Application(300)
+    test = Application(300, 'dot', 'square', 'square', 50, 30, 60)
     test.on_execute()
