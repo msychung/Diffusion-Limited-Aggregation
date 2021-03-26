@@ -1,4 +1,5 @@
-from variablestep import Variable_Step, random
+from variablestep import Variable_Step
+import random
 import pytest
 random.seed(5)   # Random seed used to create reproducibility of results and generate numbers to write the below tests. 
 
