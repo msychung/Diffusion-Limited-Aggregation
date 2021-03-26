@@ -10,15 +10,12 @@ plt.style.use('seaborn-whitegrid')
 
 class Variable_Step():
     '''
-    Implementation of scalar standard Brownian motion, in the time interval [0, T] with N points ((N - 1) subintervals). Begins with a simple y = x plot, before plotting positions for 1D, 2D and 3D Brownian motion. Each time, a different set of results and output plot should be produced. This can be prevented by using a seed to maintain reproducibility, using np.random.seed(0) and changing the parameter.
+    Implementation of scalar standard Brownian motion, in the time interval [0, T] with N points ((N - 1) subintervals). Plots positions for 1D, 2D and 3D Brownian motion. Each time, a different set of results and output plot should be produced. This can be prevented by using a seed to maintain reproducibility, using np.random.seed(0) and changing the parameter.
 
     Methods
     -------
     __init__
         Constructor method, sets class variables and random seed
-
-    xy_line
-        Plotting a rough x-y line using random module
 
     brownian_1D_loop
         1D Brownian motion for a single path, using a for loop
@@ -55,7 +52,7 @@ class Variable_Step():
             The number of iterations of one simulation
         '''
         np.random.seed(5)
-        
+
         self.T = T    # total simulation time
         self.N = N    # number of steps
         self.M = M    # number of paths ('walkers')
@@ -63,43 +60,6 @@ class Variable_Step():
         
         self.dt = math.sqrt(T/(N-1))    # sqrt of time interval
         self.t = np.linspace(0, T, N)    # create time list (from 0 to T with step size T/N)
-
-
-    def xy_line(self):
-        '''
-        Practising use of pseudo-RNGs, dataframes and plotting.
-        Produces a scatter plot of x co-ordinates against y co-ordinates, following a y = x line with minor deviations. 
-        Should produce a slightly different plot each time (because it's random..!), better approximating a straight line y = x for a greater N. 
-        '''
-        ### Initialise method parameters
-        h = math.sqrt(self.T/self.N)
-
-        '''For larger N, it is more efficient to append to lists then call the dataframe constructor, than to create an empty dataframe and append to it.
-        This is because pandas append() returns a copy of the original df and the new one (quadratic copy with complexity O(N^2))'''
-        
-        ### Create empty lists
-        x_list = []
-        y_list = []
-
-        ### Loop to fill lists 
-        for i in range(1, self.N + 1):
-            '''random() generates a random number from the uniform distribution'''
-            x = i + h * random()
-            y = i + h * random()
-
-            x_list.append(x)
-            y_list.append(y)
-
-        ### Create dataframe and fill with lists, then delete lists
-        df = pd.DataFrame({'x': x_list, 'y': y_list})
-        del x_list, y_list
-
-        ### Plot x against y 
-        fig, ax = plt.figure(), plt.axes()
-        ax.plot(df['x'], df['y'], marker='o', markersize=1, linewidth=0)
-        ax.set(xlabel='x', ylabel='y', title='x-y plot')
-        plt.show()
-
 
     def brownian_1D_loop(self, plot=True):
         '''
@@ -111,16 +71,15 @@ class Variable_Step():
         dx = [0] * self.N     # Increment dx
 
         ### Set initial values 
-        dx[0] = self.dt * np.random.randn()  # multiples time interval by some random number in the SNN
-        x[0] = dx[0]
+        dx[0] = x[0] = self.dt * np.random.randn()  # multiplies time interval by some random number in the SNN
 
         ### Loop to fill rest of the elements of the lists
         for i in range (1, self.N):
             '''np.random.randn() generates a random number from the standard normal distribution'''
             dx[i] = self.dt * np.random.normal()
             x[i] = x[i-1] + dx[i] 
-
-        ### Create dataframe and fill with lists, then delete lists
+       
+        ## Create dataframe and fill with lists, then delete lists
         df = pd.DataFrame({'t': self.t, 'x': x, 'dx': dx})
         del x, dx
 
@@ -132,7 +91,6 @@ class Variable_Step():
             plt.show()  
 
         return df
-
 
     def brownian_1D_vec(self):
         '''
@@ -159,7 +117,8 @@ class Variable_Step():
         ax.set(xlabel='Time t', ylabel='Random Variable $X(t)$', title='1D Brownian Motion Multiple Paths (Variable Step Size)')
 
         plt.show()  
-
+        
+        return df
 
     def brownian_2D_loop(self, plot=True):
         '''
@@ -240,6 +199,8 @@ class Variable_Step():
 
         plt.show()  
 
+        return df_join
+
 
     def brownian_3D_vec(self):
         '''
@@ -277,10 +238,13 @@ class Variable_Step():
 
         plt.show()  
 
+        return df_join
+
 
     def calc_displacements(self, dimension):
         '''
-        Calculates average displacement and rms displacement over many iterations, for random walks in 1D, 2D and 3D.
+        Calculates average displacement over many iterations, for random walks in 1D, 2D and 3D.
+        N.B. The rms displacement has no clear relation to N for variable step size. 
 
         Parameters
         ----------
@@ -303,6 +267,8 @@ class Variable_Step():
             # rms_disp = math.sqrt(all_coord_sq/self.iterations)
 
             print(f"For {self.iterations} iterations and {self.N} steps, the average displacement is {av_disp}.")
+            
+            return av_disp
 
         elif dimension == '2D':
             for i in range(self.iterations):
@@ -317,12 +283,14 @@ class Variable_Step():
 
             print(f"For {self.iterations} iterations and {self.N} steps, the average displacement is {av_disp}.")
 
+            return av_disp
+
         else:   # dimension == '3D'
             print("Still yet to implement 3D average displacement calculation.")
 
 
 if __name__ == '__main__':
     ### Create instance of class and call relevant method
-    test = Variable_Step(1.0, 10000, 5, 1000)
-    # test.brownian_2D_loop()
-    test.calc_displacements('2D')
+    test = Variable_Step(1.0, 1000, 5, 100)
+    # test.brownian_3D_vec()
+    # test.calc_displacements('2D')
