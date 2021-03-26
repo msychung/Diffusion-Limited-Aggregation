@@ -61,6 +61,7 @@ class Variable_Step():
         self.dt = math.sqrt(T/(N-1))    # sqrt of time interval
         self.t = np.linspace(0, T, N)    # create time list (from 0 to T with step size T/N)
 
+
     def brownian_1D_loop(self, plot=True):
         '''
         1D Brownian Motion Path for a single walker, using a for loop
@@ -92,6 +93,7 @@ class Variable_Step():
 
         return df
 
+
     def brownian_1D_vec(self):
         '''
         1D Brownian Motion Path, using vectorised method and for multiple (M) walkers
@@ -120,6 +122,7 @@ class Variable_Step():
         
         return df
 
+
     def brownian_2D_loop(self, plot=True):
         '''
         2D Brownian Motion Path for a single walker, using a for loop
@@ -129,7 +132,7 @@ class Variable_Step():
         dx = [0] * self.N     # Increment dx
 
         y = [0] * self.N    # Random variable y
-        dy = [0] * self.N    # Increment dx
+        dy = [0] * self.N    # Increment dy
 
         ### Set initial values 
         dx[0] = self.dt * np.random.randn()
@@ -200,6 +203,57 @@ class Variable_Step():
         plt.show()  
 
         return df_join
+
+
+    def brownian_3D_loop(self, plot=True):
+        '''
+        3D Brownian Motion Path for a single walker, using a for loop
+        '''
+        ### Create lists of zeroes of length N
+        x = [0] * self.N    # Random variable x
+        dx = [0] * self.N     # Increment dx
+
+        y = [0] * self.N    # Random variable y
+        dy = [0] * self.N    # Increment dy
+
+        z = [0] * self.N    # Random variable z
+        dz = [0] * self.N    # Increment dz
+
+        ### Set initial values 
+        dx[0] = self.dt * np.random.randn()
+        x[0] = dx[0]
+
+        dy[0] = self.dt * np.random.randn()
+        y[0] = dy[0]
+
+        dz[0] = self.dt * np.random.randn()
+        z[0] = dz[0]
+
+        ### Loop to fill rest of the elements of the lists
+        for i in range (1, self.N):
+            '''np.random.randn() generates a random number from the standard normal distribution'''
+            dx[i] = self.dt * np.random.normal()
+            x[i] = x[i-1] + dx[i] 
+
+            dy[i] = self.dt * np.random.normal()
+            y[i] = y[i-1] + dy[i] 
+
+            dz[i] = self.dt * np.random.normal()
+            z[i] = z[i-1] + dz[i] 
+
+        ### Create dataframe and fill with lists, then delete lists
+        df = pd.DataFrame({'t': self.t, 'x': x, 'dx': dx, 'y': y, 'dy': dy, 'z': z, 'dz': dz})
+        del x, dx, y, dy, z, dz
+
+        if plot == True:
+            ### Plot x against y and z
+            fig = plt.figure()
+            ax = fig.add_subplot(1, 1, 1, projection='3d')
+            ax.plot(df['x'], df['y'], df['z'], marker='o', markersize=1, linewidth=0.5)
+            ax.set(xlabel='Random Variable $X(t)$', ylabel='Random Variable $Y(t)$', zlabel='Random Variable $Z(t)$', title='3D Brownian Motion Path Single Path (Variable Step Size)')
+            plt.show()  
+
+        return df
 
 
     def brownian_3D_vec(self):
@@ -286,11 +340,25 @@ class Variable_Step():
             return av_disp
 
         else:   # dimension == '3D'
-            print("Still yet to implement 3D average displacement calculation.")
+            for i in range(self.iterations):
+                df = self.brownian_3D_loop(plot=False)
+                x = df['x'].iloc[-1]
+                y = df['y'].iloc[-1]
+                z = df['z'].iloc[-1]
+
+                all_xcoord += x
+                all_ycoord += y
+                all_zcoord += z
+
+            av_disp = (all_xcoord + all_ycoord + all_zcoord)/self.iterations
+
+            print(f"For {self.iterations} iterations and {self.N} steps, the average displacement is {av_disp}.")
+
+            return av_disp
 
 
 if __name__ == '__main__':
     ### Create instance of class and call relevant method
     test = Variable_Step(1.0, 1000, 5, 100)
-    # test.brownian_3D_vec()
-    # test.calc_displacements('2D')
+    # test.brownian_3D_loop()
+    # test.calc_displacements('3D')
