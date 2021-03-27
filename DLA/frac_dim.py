@@ -6,7 +6,7 @@ from dla_prototype import Application
 class Fractal_Dimension():
 
     def __init__(self):
-        cluster = Application(100)
+        cluster = Application(200, 'dot', 'square', 'square', 50, 100, 20)
         cluster.on_execute()
         self.position_list = cluster.crystal_position
         self.x0, self.y0 = cluster.start_x, cluster.start_y
@@ -16,23 +16,28 @@ class Fractal_Dimension():
         logMass = np.log(mass)
         return mass, logMass
         
-
+    
     def cluster_radius(self):
-        pos = self.position_list
-        x = max(pos[0]) - self.x0
-        y = max(pos[1]) - self.y0
-        radius = math.sqrt(x**2 + y**2)
-        logRadius = np.log(radius)
-        return radius, logRadius
+        max_radius = 0
+        for cluster in self.position_list:
+            x = cluster[0] - self.x0
+            y = cluster[1] - self.y0
+            radius = np.sqrt(x**2 + y**2)
         
+            if radius > max_radius:
+                max_radius = radius
+
+        logRadius = np.log(math.floor(max_radius))
+        return math.floor(max_radius), logRadius
+
 
 def print_results(test):
     mass, logMass = test.cluster_mass()
     radius, logRadius = test.cluster_radius()
     print("N = ", mass)
     print("ln(mass) = ", logMass)
-    print("ln(radius) = ", logRadius)
     print("radius = ", radius)
+    print("ln(radius) = ", logRadius)
 
 
 if __name__ == '__main__':
