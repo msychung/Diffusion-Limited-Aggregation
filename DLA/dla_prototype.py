@@ -42,7 +42,7 @@ class Application():
 
     def __init__(self, n, seed_shape, spawn_shape, padSize, crystal_size_limit, view=False):
         '''
-        Initialises all class attributes and creates n particles based on the Particle class. Calls the on_execute() method to run the simulation.
+        Initialises all class attributes and creates n particles based on the Particle class. 
 
         Parameters
         ----------
@@ -62,6 +62,8 @@ class Application():
         ### Raise an exception if the input spawn_shape parameter is invalid
         if spawn_shape != 'square' and spawn_shape != 'circle':
             raise Exception('Parameter "spawn_shape" must be "square" or "circle".')
+
+        np.random.seed(5)
  
         ### Initialise display surface, set its size and initialise pixel array and colour
         self.size = self.width, self.height = 800, 600      # size of display screen
@@ -93,7 +95,7 @@ class Application():
         self.crystal_size_limit = crystal_size_limit
 
         ### Set a sticking coefficient, describing the probability a particle will stick to the cluster
-        self.stick_coeff = 0.8
+        self.stick_coeff = 1.0
         
         ### Create an empty list to store all the particle objects created below
         self.all_particles = []
@@ -115,10 +117,7 @@ class Application():
         ### Initialise min and max x, y to define a rectangular cluster domain (limits of cluster)
         self.min_x, self.min_y = self.start_x, self.start_y
         self.max_x, self.max_y = self.start_x, self.start_y
-
-        ### Call the main on_execute() method
-        self.on_execute()
-
+        
 
     def on_init(self):
         '''Initialises pygame attributes.'''
@@ -164,10 +163,10 @@ class Application():
             pygame.draw.circle(self.displaySurface, self.crystalColor, (self.start_x, self.start_y), 30, width=1)
 
         elif self.seed_shape == 'ellipse':
-            pygame.draw.ellipse(self.displaySurface, self.crystalColor, ((self.start_x, self.start_y), (32, 20)), width = 1)
+            pygame.draw.ellipse(self.displaySurface, self.crystalColor, ((self.start_x, self.start_y), (45, 32)), width = 1)
 
         elif self.seed_shape == 'square':
-            pygame.draw.rect(self.displaySurface, self.crystalColor, ((self.start_x, self.start_y), (50, 50)), width = 1)
+            pygame.draw.rect(self.displaySurface, self.crystalColor, ((self.start_x, self.start_y), (30, 30)), width = 1)
 
         elif self.seed_shape == 'star':   # because my dad asked me to!
             x = self.start_x
@@ -239,6 +238,7 @@ class Application():
         Loops around each of the n particles and updates positions by one step.
         '''
         ss = 1    # Set step size of paricles
+        self.gen_seed()
 
         ### Recolour existing (and growing) crystal each loop iteration, only if self.view == True
         if self.view:
@@ -258,7 +258,7 @@ class Application():
             new_x, new_y = self.wrap_around(particle, new_x, new_y)
             
             # Check if pixel has already been covered by walker 
-            if self.pixelArray[new_x, new_y] == self.crystalColor and random.random() <= self.stick_coeff:  
+            if self.pixelArray[new_x, new_y] == self.crystalColor and random.random() <= self.stick_coeff:
                 # Set pixel to same colour as growing crystal and append to crystal_position list
                 self.pixelArray[particle.x, particle.y] = self.crystalColor
                 self.crystal_position.append((particle.x, particle.y))
@@ -272,6 +272,7 @@ class Application():
                 if distance > self.crystal_size_limit:
                     time = pygame.time.get_ticks() - self.start_time
                     print("A total of", time/1000, "seconds has elapsed.")
+                    pygame.time.wait(10000)
                     self.isRunning = False
                     return
 
@@ -401,4 +402,5 @@ class Application():
 # Prevents this test object instantiating when running the file externally (i.e. from frac_dim.py)
 if __name__ == '__main__':
     ### Form: Application(n, seed_shape, spawn_shape, padSize, crystal_size_limit, view=False)
-    test = Application(1000, 'dot', 'circle', 50, 200)
+    test = Application(100, 'dot', 'circle', 150, 100, True)
+    self.on_execute()
