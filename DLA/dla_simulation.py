@@ -5,17 +5,18 @@ import pygame
 
 
 class Particle():
-    '''Component class used to ...'''
+    '''Component class used to set and update the co-ordinate of particle positions.'''
+    
     def __init__(self, x, y):
         '''
-        .
+        Set the initial x-y co-ordinate positions of a single particle.
 
         Parameters
         ----------
         x : int
-            The horizontal pixel position...
+            The initial horizontal pixel position
         y : int
-            The vertical pixel position... 
+            The initial vertical pixel position
         '''
         self.x = x
         self.y = y
@@ -23,14 +24,14 @@ class Particle():
 
     def update(self, x, y):
         '''
-        .
+        Update x-y co-ordinate positions of a single particle.
 
         Parameters
         ----------
         x : int
-            The horizontal pixel position...                   
+            The updated horizontal pixel position                  
         y : int
-            The vertical pixel position... 
+            The udpated vertical pixel position
         '''
         self.x = x
         self.y = y
@@ -62,8 +63,6 @@ class Application():
         ### Raise an exception if the input spawn_shape parameter is invalid
         if spawn_shape != 'square' and spawn_shape != 'circle':
             raise Exception('Parameter "spawn_shape" must be "square" or "circle".')
-
-        np.random.seed(5)
  
         ### Initialise display surface, set its size and initialise pixel array and colour
         self.size = self.width, self.height = 800, 600      # size of display screen
@@ -94,7 +93,7 @@ class Application():
         ### Set a size limit for the growing crystal
         self.crystal_size_limit = crystal_size_limit
 
-        ### Set a sticking coefficient, describing the probability a particle will stick to the cluster
+        ### Set a sticking coefficient, describing the probability a particle will stick to the cluster (1 means it will always stick)
         self.stick_coeff = 1.0
         
         ### Create an empty list to store all the particle objects created below
@@ -402,5 +401,5 @@ class Application():
 # Prevents this test object instantiating when running the file externally (i.e. from frac_dim.py)
 if __name__ == '__main__':
     ### Form: Application(n, seed_shape, spawn_shape, padSize, crystal_size_limit, view=False)
-    test = Application(100, 'dot', 'circle', 150, 100, True)
-    self.on_execute()
+    test = Application(100, 'dot', 'circle', 50, 100)
+    test.on_execute()
