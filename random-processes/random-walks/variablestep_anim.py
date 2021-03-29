@@ -1,3 +1,5 @@
+### NOW OBSOLETE: MOVED INTO VARIABLE_STEP.PY
+
 import math
 import numpy as np
 import matplotlib.pyplot as plt
