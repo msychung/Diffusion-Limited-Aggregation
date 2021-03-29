@@ -1,4 +1,4 @@
-from dla_prototype import Particle, Application
+from dla_simulation import Particle, Application
 import pytest
 
 @pytest.fixture
