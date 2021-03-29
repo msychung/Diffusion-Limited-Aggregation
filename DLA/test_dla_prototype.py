@@ -48,11 +48,11 @@ def test_application_init(application):
     assert application.min_y == 300
     assert application.max_y == 300
 
-def test_applicaiton_square_spawn(application):
+def test_application_square_spawn(application):
     assert isinstance(application.square_spawn()[0], int)
     assert isinstance(application.square_spawn()[1], int)
 
-def test_applicaiton_circle_spawn(application):
+def test_application_circle_spawn(application):
     assert isinstance(application.circle_spawn()[0], int)
     assert isinstance(application.circle_spawn()[1], int)
 
@@ -68,7 +68,7 @@ def test_gen_seed(application):
 ])
 
 def test_wrap_around_square(application, particle, new_x, new_y, expected_x, expected_y):
-    assert application.wrap_around(particle, new_x, new_y) == (expected_x, expected_y) # Needs to be extended to circle shape too...
+    assert application.wrap_around(particle, new_x, new_y) == (expected_x, expected_y) 
 
 def test_wrap_around_circle(application, particle):
     application.spawn_shape = 'circle'
