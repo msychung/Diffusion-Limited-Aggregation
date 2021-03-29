@@ -2,99 +2,74 @@ from dla_prototype import Particle, Application
 import pytest
 
 @pytest.fixture
-def particle_square():
-    spawn_shape = 'square'
-    sqdomainMin_x = 30 
-    sqdomainMax_x = 100
-    sqdomainMin_y = 40
-    sqdomainMax_y = 110
-    start_x = 400
-    start_y = 300
-    radius = 50
-    return Particle(spawn_shape, sqdomainMin_x, sqdomainMax_x, sqdomainMin_y, sqdomainMax_y, start_x, start_y, radius)
-
-@pytest.fixture
-def particle_circle():
-    spawn_shape = 'circle'
-    sqdomainMin_x = 30 
-    sqdomainMax_x = 100
-    sqdomainMin_y = 40
-    sqdomainMax_y = 110
-    start_x = 400
-    start_y = 300
-    radius = 50
-    return Particle(spawn_shape, sqdomainMin_x, sqdomainMax_x, sqdomainMin_y, sqdomainMax_y, start_x, start_y, radius)
+def particle():
+    x, y = 5, 10
+    return Particle(x, y)
 
 @pytest.fixture
 def application():
     n = 100
     seed_shape = 'line'
-    spawn_shape = 'circle'
-    domain_shape = 'circle'
+    spawn_shape = 'square'
     padSize = 70
-    radius = 50
     crystal_size_limit = 100
-    return Application(n, seed_shape, spawn_shape, domain_shape, padSize, radius, crystal_size_limit)
+    return Application(n, seed_shape, spawn_shape, padSize, crystal_size_limit)
 
-def test_particle_init(particle_square, particle_circle):
-    assert particle_square.spawn_shape == particle_square.square_spawn
-    assert particle_circle.spawn_shape == particle_circle.circle_spawn
+def test_particle_init(particle):
+    assert particle.x == 5
+    assert particle.y == 10
 
-    with pytest.raises(Exception):
-        Particle('hexagon', 1, 1, 1, 1, 1, 1, 1)
-
-def test_particle_square_spawn(particle_square):
-    assert isinstance(particle_square.x, int)
-    assert isinstance(particle_square.y, int)
-
-def test_particle_circle_spawn(particle_circle):
-    assert isinstance(particle_circle.x, int)
-    assert isinstance(particle_circle.y, int)
+def test_particle_update(particle):
+    particle.update(1, 2)
+    assert particle.x == 1
+    assert particle.y == 2
 
 def test_application_init(application):
-    assert application.displaySurface == None
-    assert application.size == (640, 360)
-    assert application.width == 640
-    assert application.height == 360
-    assert application.pixelArray == None
+    assert application.size == (800, 600)
+    assert application.width == 800
+    assert application.height == 600
     assert application.crystalColor == 0xDCDCDC
     assert application.n == 100
     assert application.seed_shape == 'line'
-    assert application.spawn_shape == 'circle'
-    assert application.domain_shape == 'circle'
-    assert application.start_x == 320
-    assert application.start_y == 180
-    assert application.updateFlag == False
+    assert application.spawn_shape == 'square'
+    assert application.start_x == 400
+    assert application.start_y == 300
     assert application.padSize == 70
-    assert application.sqdomainMin_x == 250
-    assert application.sqdomainMax_x == 390
-    assert application.sqdomainMin_y == 110
-    assert application.sqdomainMax_y == 250
-    assert application.radius == 50
+    assert application.sqdomainMin_x == 330
+    assert application.sqdomainMax_x == 470
+    assert application.sqdomainMin_y == 230
+    assert application.sqdomainMax_y == 370
+    assert application.radius == 70
     assert application.crystal_size_limit == 100
     assert len(application.all_particles) == 100
     assert application.crystal_position == []
-    assert application.min_x == 320
-    assert application.max_x == 320
-    assert application.min_y == 180
-    assert application.max_y == 180
+    assert application.min_x == 400
+    assert application.max_x == 400
+    assert application.min_y == 300
+    assert application.max_y == 300
 
-def test_gen_seed(application, particle_square):
+def test_applicaiton_square_spawn(application):
+    assert isinstance(application.square_spawn()[0], int)
+    assert isinstance(application.square_spawn()[1], int)
+
+def test_applicaiton_circle_spawn(application):
+    assert isinstance(application.circle_spawn()[0], int)
+    assert isinstance(application.circle_spawn()[1], int)
+
+def test_gen_seed(application):
     with pytest.raises(Exception):
-        application.gen_seed(particle_square, 'test')
+        application.gen_seed('test')
 
-@pytest.mark.parametrize('shape, new_x, new_y, expected_x, expected_y', [
-    ('square', 230, 120, 390, 120),
-    ('square', 300, 50, 300, 250),
-    ('square', 420, 160, 250, 160),
-    ('square', 270, 300, 270, 110)
+@pytest.mark.parametrize('new_x, new_y, expected_x, expected_y', [
+    (230, 120, 470, 370),
+    (300, 50, 470, 370),
+    (420, 160, 420, 370),
+    (270, 300, 470, 300)
 ])
 
-def test_wrap_around(application, shape, new_x, new_y, expected_x, expected_y):
-    assert application.wrap_around(shape, new_x, new_y) == (expected_x, expected_y) # Needs to be extended to circle shape too...
+def test_wrap_around_square(application, particle, new_x, new_y, expected_x, expected_y):
+    assert application.wrap_around(particle, new_x, new_y) == (expected_x, expected_y) # Needs to be extended to circle shape too...
 
-def test_restrict_domain(application):
-    assert application.sqdomainMin_x == 250
-    assert application.sqdomainMax_x == 390
-    assert application.sqdomainMin_y == 110
-    assert application.sqdomainMax_y == 250
+def test_wrap_around_circle(application, particle):
+    application.spawn_shape = 'circle'
+    assert application.wrap_around(particle, 100, 150) == (-5, -10)
