@@ -12,15 +12,18 @@ class Particle():
     def update(self, x, y):
         self.x = x
         self.y = y
-
-
+        
 class Application():
 
-    def __init__(self, n, seed_shape, spawn_shape, padSize, radius, crystal_size_limit, view=False):
+    def __init__(self, n, seed_shape, spawn_shape, padSize, crystal_size_limit, view=False):
+        if spawn_shape != 'square' and spawn_shape != 'circle':
+            raise Exception('Parameter "spawn_shape" must be "square" or "circle".')
+
         # Initialise display surface, set its size and initialise pixel array and colour
         self.size = self.width, self.height = 800, 600      # size of display screen
         self.crystalColor = 0xDCDCDC        # grey
         self.n = n
+        self.view = view
         
         # Set seed, spawn and domain shapes
         self.seed_shape = seed_shape
@@ -68,7 +71,6 @@ class Application():
 
         self.on_execute()
 
-
     def on_init(self):
         pygame.init()
         pygame.display.set_caption("2D Diffusion Limited Aggregation")      # Window title
@@ -78,11 +80,7 @@ class Application():
         self.gen_seed()
         self.isRunning = True
         self.start_time = pygame.time.get_ticks()       # Set a timer
-
-        # if self.view == False:
-        #     pygame.display.quit()
     
-
     def on_event(self, event):
         '''
         Called during main on_execute() loop which loops over all events continuously during the simulation.
@@ -92,7 +90,6 @@ class Application():
             time = pygame.time.get_ticks() - self.start_time
             print("A total of", time/1000, "seconds has elapsed.")
             self.isRunning = False
-
 
     def gen_seed(self):
         '''
@@ -122,7 +119,6 @@ class Application():
         else:
             raise Exception("Invalid seed shape, please enter either 'dot', 'line', 'circle', 'ellipse', 'square' or 'star'.")
 
-
     def square_spawn(self):
         # Randomly choose a position on a side of a square for a particle to spawn along
         newSide = random.choice([1, 2, 3, 4])
@@ -144,7 +140,6 @@ class Application():
         
         return x, y
 
-
     def circle_spawn(self):
         # Randomly choose a position on a circle of radius r for the particle to spawn on
         theta = random.random() * 2 * math.pi
@@ -154,13 +149,18 @@ class Application():
 
         return x, y
 
-
     def on_loop(self):
         '''
         Adds one pixel to each random walk
         '''
         ss = 1    # set step size
-        # print(self.min_x, self.min_y, self.max_x, self.max_y)
+        self.gen_seed()
+
+        ### Recolour existing (and growing) crystal each loop iteration
+        if self.view:
+            for coordinate in self.crystal_position:
+                self.pixelArray[coordinate[0], coordinate[1]] = self.crystalColor
+
         for particle in self.all_particles:
             # (dx, dy) = random.choice([(0, ss), (0, -ss), (ss, 0), (-ss, 0)])
             (dx, dy) = random.choice([(0, ss), (0, -ss), (ss, 0), (-ss, 0), (ss, -ss), (-ss, ss), (ss, ss), (-ss, -ss)])
@@ -171,13 +171,7 @@ class Application():
 
             ### Call wrap_around method to wrap around movement around based on a chosen domain shape
             new_x, new_y = self.wrap_around(particle, new_x, new_y)
-
-            ### Call the generate seed method based on a chosen seed shape
-
-            ### Recolour existing (and growing) crystal each loop iteration
-            # for coordinate in self.crystal_position:
-            #     self.pixelArray[coordinate[0], coordinate[1]] = self.crystalColor
-
+            
             ### Check if pixel has already been covered by walker 
             if self.pixelArray[new_x, new_y] == self.crystalColor and random.random() <= self.stick_coeff:  # light gray
                 self.pixelArray[particle.x, particle.y] = self.crystalColor
@@ -208,8 +202,6 @@ class Application():
                     
                 self.restrict_domain()
 
-                ### Remove particle from all_particles list OR respawn from domain square
-                # self.all_particles.remove(particle)
                 ### Recycle the particle once it's stuck
                 if self.spawn_shape == 'square':
                     particle.update(*self.square_spawn())
@@ -219,12 +211,15 @@ class Application():
 
             else:
                 particle.x, particle.y = new_x, new_y
+
+                # Show individual particles moving in green
+                if self.view:
+                    self.pixelArray[particle.x, particle.y] = 0x00FF00   # green
                 
         pygame.display.update()
-        
-        # if self.all_particles:
-        #     self.displaySurface.fill((0,0,0,))      # Removes previous path of particles
 
+        if self.all_particles and self.view:
+            self.displaySurface.fill((0,0,0,))      # Removes previous path of particles
 
     def wrap_around(self, particle, new_x, new_y):
         '''
@@ -251,7 +246,6 @@ class Application():
         
         return new_x, new_y
 
-
     def restrict_domain(self):
         '''
         Ensure domain minima and maxima never extend beyond the screen boundaries
@@ -274,11 +268,6 @@ class Application():
                     max_radius = radius
 
             self.radius = max_radius + self.padSize
-            
-        ### Show individual particles moving
-        if not self.updateFlag: 
-            self.pixelArray[particle.x, particle.y] = 0x00FF00   # green
-
 
     def on_execute(self):
         '''
@@ -296,7 +285,6 @@ class Application():
 
         pygame.quit()
 
-
 # Prevents these conditions applying when running the file externally (i.e. from frac_dim.py)
 if __name__ == '__main__':
-    test = Application(1000, 'dot', 'circle', 50, 40, 100)
+    test = Application(1000, 'dot', 'circle', 50, 200)
