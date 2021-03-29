@@ -1,16 +1,19 @@
 import math
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
 from cycler import cycler
 from numpy import random
 from random import random
+import matplotlib
+import matplotlib.pyplot as plt
+from matplotlib import animation
+from mpl_toolkits import mplot3d
 plt.style.use('seaborn-whitegrid')
 
 
 class Variable_Step():
     '''
-    Implementation of scalar standard Brownian motion, in the time interval [0, T] with N points ((N - 1) subintervals). Plots positions for 1D, 2D and 3D Brownian motion. Each time, a different set of results and output plot should be produced. This can be prevented by using a seed to maintain reproducibility, using np.random.seed(0) and changing the parameter.
+    Implementation of scalar standard Brownian motion for multiple particles, in the time interval [0, T] with N points ((N - 1) subintervals). Plots positions for 1D, 2D and 3D Brownian motion. Each time, a different set of results and output plot should be produced. This can be prevented by using a seed to maintain reproducibility, using np.random.seed(0) and changing the parameter.
 
     Methods
     -------
@@ -31,6 +34,9 @@ class Variable_Step():
 
     brownian_3D_vec
         3D Brownian motion for multiple maths, using a vectorised method
+
+    calc_displacements
+        Calculating the average displacement of a particle from the origin over multiple iterations
     '''
 
     def __init__(self, T, N, M, iterations):
@@ -87,6 +93,7 @@ class Variable_Step():
         if plot == True:
             ### Plot t against x 
             fig, ax = plt.figure(), plt.axes()
+            fig.set_size_inches(8, 4)
             ax.plot(df['t'], df['x'], marker='o', markersize=1, linewidth=0)
             ax.set(xlabel='Time t', ylabel='Random Variable $X(t)$', title='1D Brownian Motion Single Path')
             plt.show()  
@@ -109,6 +116,7 @@ class Variable_Step():
 
         ### Plot t against x 
         fig, ax = plt.figure(), plt.axes()
+        fig.set_size_inches(8, 4)
 
         # Aesthetics: cycles through a colormap
         ax.set_prop_cycle('color', plt.cm.winter(np.linspace(0, 4, self.M*4)))  
@@ -158,6 +166,7 @@ class Variable_Step():
             ### Plot x against y
             fig = plt.figure()
             ax = fig.add_subplot(111)
+            fig.set_size_inches(8, 4)
 
             # for i in range(M):
             ax.plot(df['x'], df['y'], marker='o', markersize=1, linewidth=0.5)
@@ -191,12 +200,13 @@ class Variable_Step():
 
         ### Plot x against y 
         fig, ax = plt.figure(), plt.axes()
+        fig.set_size_inches(8, 4)
 
         # Aesthetics: cycles through a colormap
         ax.set_prop_cycle('color', plt.cm.winter(np.linspace(0, 4, self.M*4)))  
 
         for i in range(self.M):
-            ax.plot(df_join.iloc[:, i+1], df_join.iloc[:, i+1+self.M], marker='o', markersize=0.25, linewidth=0.2)
+            ax.plot(df_join.iloc[:, i+1], df_join.iloc[:, i+1+self.M], marker='o', markersize=0.25, linewidth=0.3)
 
         ax.set(xlabel='Random Variable $X(t)$', ylabel='Random Variable $Y(t)$', title='2D Brownian Motion Multiple Paths (Variable Step Size)')
 
@@ -248,6 +258,7 @@ class Variable_Step():
         if plot == True:
             ### Plot x against y and z
             fig = plt.figure()
+            fig.set_size_inches(8, 4)
             ax = fig.add_subplot(1, 1, 1, projection='3d')
             ax.plot(df['x'], df['y'], df['z'], marker='o', markersize=1, linewidth=0.5)
             ax.set(xlabel='Random Variable $X(t)$', ylabel='Random Variable $Y(t)$', zlabel='Random Variable $Z(t)$', title='3D Brownian Motion Path Single Path (Variable Step Size)')
@@ -281,6 +292,7 @@ class Variable_Step():
         ### Plot x against y and z
         fig = plt.figure()
         ax = fig.add_subplot(1, 1, 1, projection='3d')
+        fig.set_size_inches(8, 4)
 
         # Aesthetics: cycles through a colormap
         ax.set_prop_cycle('color', plt.cm.winter(np.linspace(0, 4, self.M*4)))  
@@ -288,6 +300,7 @@ class Variable_Step():
         for i in range(self.M):
             ax.plot(df_join.iloc[:, i+1], df_join.iloc[:, i+1+self.M], df_join.iloc[:, i+1+self.M+self.M], marker='o', markersize=0.25, linewidth=0.2)
 
+        matplotlib.rcParams.update({'font.size': 6})
         ax.set(xlabel='Random Variable $X(t)$', ylabel='Random Variable $Y(t)$', zlabel='Random Variable $Z(t)$', title='3D Brownian Motion Multiple Paths (Variable Step Size)')
 
         plt.show()  
@@ -357,8 +370,71 @@ class Variable_Step():
             return av_disp
 
 
+def make_animation(brownian, dimension):
+    '''
+    Uses matplotlib.animation to visualise live generation of random walks in 1D, 2D and 3D. 
+    '''
+    
+    fig = plt.figure()
+
+    if dimension == '1D':
+        ylim_max = max([brownian[column].max() for column in brownian.columns[1:]])
+        ylim_min = min([brownian[column].min() for column in brownian.columns[1:]])
+        xlim_max = brownian['Time'].iloc[-1]
+        xlim_min = 0
+        ax = plt.axes(xlim = (xlim_min, xlim_max), ylim = (ylim_min, ylim_max))
+        lines = [ax.plot([], [], '-')[0] for i in range(len(brownian.columns[1:]))]
+    
+        def animate(i):
+            time = brownian['Time']
+            for l, column in enumerate(brownian.columns[1:]):
+                lines[l].set_data([time[: i]], [brownian[column][:i]])
+            
+            return lines
+    
+    elif dimension == '2D':
+        ylim_max = max([brownian[columns].iloc[:,1].max() for columns in brownian.columns[1:]])
+        ylim_min = min([brownian[columns].iloc[:,1].min() for columns in brownian.columns[1:]])
+        xlim_max = max([brownian[columns].iloc[:,0].max() for columns in brownian.columns[1:]])
+        xlim_min = min([brownian[columns].iloc[:,0].min() for columns in brownian.columns[1:]])
+        ax = plt.axes(xlim = (xlim_min, xlim_max), ylim = (ylim_min, ylim_max))
+        lines = [ax.plot([], [], '-')[0] for i in range((len(brownian.iloc[1, :])-1)//2-2)]
+
+        def animate(i):
+            time = brownian['Time']
+     
+            for l in range(1, (len(brownian.iloc[1, :])-1)//2-1):
+                lines[l-1].set_data([brownian[l].iloc[:i, 0]], [brownian[l].iloc[:i, 1]])
+            
+            return lines
+
+    elif dimension == '3D':
+        zlim_max = max([brownian[columns].iloc[:,2].max() for columns in brownian.columns[1:]])
+        zlim_min = min([brownian[columns].iloc[:,2].min() for columns in brownian.columns[1:]])
+        ylim_max = max([brownian[columns].iloc[:,1].max() for columns in brownian.columns[1:]])
+        ylim_min = min([brownian[columns].iloc[:,1].min() for columns in brownian.columns[1:]])
+        xlim_max = max([brownian[columns].iloc[:,0].max() for columns in brownian.columns[1:]])
+        xlim_min = min([brownian[columns].iloc[:,0].min() for columns in brownian.columns[1:]])
+        ax = plt.axes(xlim = (xlim_min, xlim_max), ylim = (ylim_min, ylim_max), zlim = (zlim_min, zlim_max), projection='3d')
+        lines = [ax.plot([], [], [], '-')[0] for i in range((len(brownian.iloc[1, :])-1)//3-2)]
+
+        def animate(i):
+            
+            for l in range(1, (len(brownian.iloc[1, :])-1)//3-1):
+                lines[l-1].set_data(np.array(brownian[l].iloc[:i, 0]), np.array(brownian[l].iloc[:i, 1]))
+                lines[l-1].set_3d_properties(np.array(brownian[l].iloc[:i, 2]))
+            
+            return lines
+
+    else:
+        raise Exception("Parameter 'animate' must be '1D', '2D' or '3D'.")
+
+    anim = animation.FuncAnimation(fig, animate, frames=1000, interval=25, blit=True)
+    plt.show()
+
+
 if __name__ == '__main__':
-    ### Create instance of class and call relevant method
-    test = Variable_Step(1.0, 1000, 5, 100)
-    # test.brownian_3D_loop()
-    # test.calc_displacements('3D')
+    ### Create instance of class and call relevant method. Remember to change the name of the function called in brownian, along with the input parameter in make_animation(). (e.g. make sure both are 2D if you want to animate in 2D)
+    test = Variable_Step(1.0, 100, 5, 500)
+    brownian = test.brownian_3D_vec()
+    make_animation(brownian, "3D")  
