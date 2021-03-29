@@ -1,15 +1,13 @@
 import math
 import numpy as np
-import pandas as pd
+import matplotlib
 import matplotlib.pyplot as plt
-import matplotlib.animation as animation
-from cycler import cycler
 import random
 plt.style.use('seaborn-whitegrid')
 
 class Constant_Step():
     '''
-    Implementation of scalar standard Brownian motion, in the time interval [0, T] with N points ((N - 1) subintervals). Begins with a simple y = x plot, before plotting positions for 1D, 2D and 3D Brownian motion. Each time, a different set of results and output plot should be produced. This can be prevented by using a seed to maintain reproducibility, using np.random.seed(0) and changing the parameter.
+    Discrete implementation of scalar standard Brownian motion of a single particle, in the time interval [0, T] with N points ((N - 1) subintervals). Plots positions for 1D, 2D and 3D in discrete space, and calculates values for average displacement and rms displacement over many iterations. Each run of the class should yield a different set of results and output plot. This can be prevented by using a seed to maintain reproducibility, i.e. using np.random.seed(0) and changing the parameter.
 
     Methods
     -------
@@ -17,7 +15,7 @@ class Constant_Step():
         Constructor method, sets class variables.
 
     gen_random_walk
-        Creates a random walk with constant step size, using np.random.choice. 
+        Creates a random walk in 1D, 2D and 3D with constant step size, using random.choice. 
 
     calc_displacements
         Calculates and prints average displacement and rms displacement over many iterations, for random walks in 1D, 2D and 3D.
@@ -33,18 +31,20 @@ class Constant_Step():
         Parameters
         ----------
         N : int
-            The number of steps taken by any one walker
+            The number of steps taken by any one walker (particle)
 
         ss : float
-            The (fixed) step size
+            The (fixed) step size taken by a walker
 
         iterations : int
             The number of times the simulation is run 
         '''
+
         self.N = N      # number of steps
         self.ss = ss      # step size
         self.iterations = iterations     # number of iterations
 
+        # Initialise lists containing x, y, z positions and distances. These are lists of zeros of length N
         self.x = [0] * self.N
         self.y = [0] * self.N
         self.z = [0] * self.N
@@ -53,15 +53,13 @@ class Constant_Step():
 
     def gen_random_walk(self, dimension): 
         '''
-        Creates a random walk with constant step size, using np.random.choice. 
+        Creates a random walk with constant step size in 1D, 2D or 3D, using random.choice. 
 
         Parameters
         ----------
         dimension : str
             Selects which array is returned based on number of random variables
         '''
-
-        ### Create lists of zeros of length N and set first value to 0
         
         if dimension == '1D':
             for i in range(1, self.N):
@@ -71,7 +69,7 @@ class Constant_Step():
 
             coord_1D = self.x[-1]
         
-            ### Only run this if doing a single iteration!
+            ### Only run this if doing a single iteration, otherwise you get lots of print statemente!
             # print('Destination co-ordinates =', coord_1D, ', Distance =', self.distances[-1])
 
             return coord_1D
@@ -181,19 +179,20 @@ class Constant_Step():
             Selects which array is returned based on number of random variables
         '''
         steps = list(range(self.N))
+        matplotlib.rcParams.update({'font.size': 9})
 
         if dimension == '1D':
             ### Unpack return arguments and create time list
             coord_1D = self.gen_random_walk('1D')
 
             fig, ax = plt.subplots(2, 1)
-            fig.set_size_inches(8, 6)
+            fig.set_size_inches(9, 6)
             ### Plot no. of steps against x
-            ax[0].plot(steps, self.x, marker='o', markersize=0.5, linewidth=0)
-            ax[0].set(xlabel='Number of steps', ylabel='Random Variable $X(t)$', title='1D Brownian Motion Path for Fixed Step Size')
+            ax[0].plot(steps, self.x, marker='o', markersize=0.4, linewidth=0)
+            ax[0].set(xlabel='Number of steps', ylabel='Random Variable $X(t)$', title='1D Brownian Motion Path for Constant Step Size')
 
             ### Plot no. of steps against distance
-            ax[1].plot(steps, self.distances, marker='o', markersize=0.5, linewidth=0)
+            ax[1].plot(steps, self.distances, marker='o', markersize=0.4, linewidth=0)
             ax[1].set(xlabel='Number of steps', ylabel='Distance', title='1D Distance with Number of Steps')
             plt.tight_layout()
             plt.show()  
@@ -204,13 +203,13 @@ class Constant_Step():
             coord_2D = self.gen_random_walk('2D')
 
             fig, ax = plt.subplots(2, 1)
-            fig.set_size_inches(8, 6)
+            fig.set_size_inches(9, 6)
             ### Plot x against y
-            ax[0].plot(self.x, self.y, marker='o', markersize=1, linewidth=0.3)
-            ax[0].set(xlabel='Random Variable $X(t)$', ylabel='Random Variable $Y(t)$', title='2D Brownian Motion Path for Fixed Step Size')
+            ax[0].plot(self.x, self.y, marker='o', markersize=0.4, linewidth=0)
+            ax[0].set(xlabel='Random Variable $X(t)$', ylabel='Random Variable $Y(t)$', title='2D Brownian Motion Path for Constant Step Size')
 
             ### Plot no. of steps against distance
-            ax[1].plot(steps, self.distances, marker='o', markersize=0.5, linewidth=0)
+            ax[1].plot(steps, self.distances, marker='o', markersize=0.4, linewidth=0)
             ax[1].set(xlabel='Number of steps', ylabel='Distance', title='2D Distance with Number of Steps')
             plt.tight_layout()
             plt.show() 
@@ -223,14 +222,14 @@ class Constant_Step():
             ### Plot x against y and z
             fig = plt.figure()
             ax = fig.add_subplot(1, 1, 1, projection='3d')
-            ax.plot(self.x, self.y, self.z, marker='o', markersize=0.5, linewidth=0)
-            ax.set(xlabel='Random Variable $X(t)$', ylabel='Random Variable $Y(t)$', zlabel='Random Variable $Z(t)$', title='3D Brownian Motion Path for Fixed Step Size')
+            ax.plot(self.x, self.y, self.z, marker='o', markersize=0.4, linewidth=0)
+            ax.set(xlabel='Random Variable $X(t)$', ylabel='Random Variable $Y(t)$', zlabel='Random Variable $Z(t)$', title='3D Brownian Motion Path for Constant Step Size')
             plt.show()  
 
             ### Plot no. of steps against distance
             fig, ax = plt.figure(), plt.axes()
-            fig.set_size_inches(9, 5)
-            ax.plot(steps, self.distances, marker='o', markersize=0.5, linewidth=0)
+            fig.set_size_inches(9, 3)
+            ax.plot(steps, self.distances, marker='o', markersize=0.2, linewidth=0)
             ax.set(xlabel='Number of steps', ylabel='Distance', title='3D Distance with Number of Steps')
             plt.tight_layout()
             plt.show() 
@@ -238,7 +237,7 @@ class Constant_Step():
 
 if __name__ == '__main__':
     ### Call method with dimension parameter
-    test = Constant_Step(2000, 1, 1000)
+    test = Constant_Step(5000, 1, 100000)
     # test.gen_random_walk('3D')
     # test.calc_displacements('3D')
-    # test.plot_random_walk('3D')
+    test.plot_random_walk('3D')
