@@ -1,4 +1,3 @@
-import imageio
 import math
 import numpy as np
 import pandas as pd
@@ -15,7 +14,7 @@ class Fractal_Dimension():
         '''
         Adjust parameters accordingly and set range of for loop to determine number of iterations
         '''
-        self.clusters = [Application(200, 'dot', 'circle', 'circle', 50, 50, run) for run in range(2, 12, 2)]
+        self.clusters = [Application(200, 'dot', 'circle', 50, 40, run) for run in range(2, 180, 2)]
         
 
     def cluster_mass(self):
@@ -96,7 +95,7 @@ def print_save_results(test):
     # print("List of ln(radius): ", logRadius_list)
 
     df = pd.DataFrame({'mass': mass_list, 'radius': max_radius_list, 'ln(mass)': logMass_list, 'ln(radius)': logRadius_list})
-    df.to_pickle("Fractal Dimension Circle")
+    # df.to_pickle("Fractal Dimension Circle")
 
     print(df.head)
 
@@ -114,7 +113,7 @@ def plot_frac_dim():
     slope : float
         The slope of the log-log plot, representing the value of the Hausdorff dimension H_d
     '''
-    df = pd.read_pickle("Fractal Dimension Circle")
+    df = pd.read_pickle("Fractal Dimension Square")
     logRadius_list = np.log(df['radius'])
     df['ln(radius)2'] = logRadius_list
     df = df.iloc[:-25]
@@ -139,9 +138,10 @@ def plot_frac_dim():
 
 
 if __name__ == '__main__':
-    test = Fractal_Dimension()
-    print_save_results(test)
-    # df = pd.read_pickle("Fractal Dimension Square")
+    # test = Fractal_Dimension()
+    # print_save_results(test)
+
+    # df = pd.read_pickle("Fractal Dimension Circle")
     # print(df.head)
 
     # slope = plot_frac_dim()
