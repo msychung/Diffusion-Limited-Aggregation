@@ -1,7 +1,7 @@
 import math
 import numpy as np
 import pandas as pd
-from dla_prototype import Application
+from dla_simulation import Application
 import matplotlib.pyplot as plt
 plt.style.use('seaborn-whitegrid')
 
