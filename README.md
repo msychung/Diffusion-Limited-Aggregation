@@ -8,6 +8,33 @@ This repository contains all code developed for the PHYS 389 Computer Modelling 
 
 I have chosen to model 2D diffusion-limited aggregation (DLA), a process involving the aggregation, or clustering, of particles undergoing Brownian motion. When such particles are allowed to adhere to a seed point, clusters (Brownian trees) are formed with distinct tree-like shapes. This is a demonstration of fractal geometry at play in the natural world, finding many practical applications in science from electrochemical deposition to snowflake formation.
 
+The fundamental basis of the model involves a particle being introduced into a system at a random position, before undergoing a random walk until it encounters an existing DLA structure. This will initially be a single stationary 'seed' particle, but upon contact the particle will permanently adhere to the seed, becoming part of the DLA cluster. The growing aggregate results in the formation of so-called 'Brownian trees'.
+
+Examples of this process can be seen below: 
+
+*insert gifs*
+
+### Structure & Design
+The two code-containing folders in this repository are [**random-processes**](https://github.com/Lancaster-Physics-Phys389-2021/phys389-2021-project-msychung/tree/main/random-processes) and [**DLA**](https://github.com/Lancaster-Physics-Phys389-2021/phys389-2021-project-msychung/tree/main/DLA). 
+
+**random-processes** contains `constantstep.py`, `variablestep.py` and `langevin.py`. The first two simulate simple random walks in 1D, 2D and 3D, with either fixed or variable step size, whilst the latter attempts to solve the Langevin equation using *scipy.integrate.solve_ivp*. This last file was ultimately not explored further. 
+
+**DLA** contains `dla_simulation.py` and `frac_dim.py`, which run the main simulation for 2D DLA and its analysis respectively. 
+
+Thus the detailed functionality of the 4 main files in this program are:
+ - `constant_step.py`
+ Generates and plots random walks in 1D, 2D and 3D with fixed step size, using *random.choice*. Calculates average and rms displacements over many walk iterations, then plots distance of a particle as a function of steps taken away from the start point. All plots are created using *matplotlib*.
+ -  `variable_step.py`
+ Extends the 1D, 2D and 3D random walks of constantstep.py to variable step size and multiple particles. Uses *numpy.random.randn* to vary step size based on the standard Gaussian distribution, and display walks for multiple particles on the same plot. Average displacement over many walk iterations is calculated. Animations are also created for multiple particles at the same time, using *matplotlib.animation*. Positional and time data is stored in a *pandas* DataFrame, for ease of plotting and animation.
+ -  `dla_simulation.py`
+ Simulates the formation of a Brownian tree by DLA in 2D. Uses *pygame* to implement an animation of particle aggregation to a central seed, as described above. Usage of composition allows a class hierarchy to form, with a composite class Application and a component class Particle. This allows implementation of many-particle trajectories simultaneously, through instantiation of the Particle class within a loop. The main Application class initialises all relevant attributes, before creating a seed under a determined spawn shape, and then updating the positions of n particles sequentially. The direction of each step increment is implemented using *random.choice*, with no bias applied in any one direction. The DLA clusters freely grow until they reach a specified size limit, upon which the simulation ends.
+ -  `frac_dim.py`
+Calculates the Hausdorff dimension D_h for a 2D DLA cluster. Extended to iterate calculations over many DLA cluster radii, allowing a more accurate D_h value to be obtained. Uses *matplotlib* to generate plots of ln(mass) against ln(radius) with best fit straight lines, to visualise the distribution of data points across a wide range of mass and radius values. Data for the calculations and plots is stored and saved in *pandas* DataFrames.
+
+There are additionally unit test files (denoted *test_filename*) for all main code files, written in *pytest*. 
+
+Finally, there are folders for [**ideas**](https://github.com/Lancaster-Physics-Phys389-2021/phys389-2021-project-msychung/tree/main/ideas) and [**notes**](https://github.com/Lancaster-Physics-Phys389-2021/phys389-2021-project-msychung/tree/main/notes), which contain documentation and markdown notes relevant to the development and submission of the project.
+
 ### Prerequisites, Installation & Usage
 Ensure you have the following prerequisites on your development machine:
 * Python - [Download & Install Python](https://www.python.org/downloads/). Ensure Python 3 is installed (not Python 2), and that you install for the correct OS
@@ -58,15 +85,7 @@ To contribute using version control software (Git):
 4) Create a pull request from your branch to master
 5) I will then review your pull request
 
-Please try to adhere to [PEP8](https://www.python.org/dev/peps/pep-0008/) style https://www.python.org/dev/peps/pep-0008/convention. My attempt at doing so is not perfect, but readability to a satisfactory level is key!
+Please try to adhere to [PEP8](https://www.python.org/dev/peps/pep-0008/) style. My attempt at doing so is not perfect, but readability to a satisfactory level is key!
 
 ### License
 This project is licensed under the [MIT License](https://opensource.org/licenses/MIT "Open Source MIT"). This license is conducive to free, open-source software.
-
----
-To add:
-- [ ] An outline of my chosen physical system 
-- [x] 'Prerequisites, installation & usage' sections
-- [x] 'Built with' section (once you know which packages you are using)
-- [x] 'Contribution' section
-- [ ] Insert picture/gif of simulation once completed
