@@ -2,7 +2,7 @@
   <img src="https://www.lancaster.ac.uk/media/lancaster-university/content-assets/images/fst/logos/Physicslogo.svg" width="350" height="95">
 </p>
 
-## PHYS 389 Computer Modelling Project
+## Diffusion Limited Aggregation
 
 This repository contains all code developed for the PHYS 389 Computer Modelling Project at Lancaster University. The course involves a further development of scientific modelling skills in Python, through the implementation of numerical algorithms in a selected physical system. A core focus is on thorough testing and debugging of software to ensure its robustness, combined with careful planning and design of an open-ended project. An understanding of OOP will be extended, and advanced data visualisation and analysis techniques will be explored. 
 
